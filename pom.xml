@@ -15,6 +15,7 @@
         <junit.platform.version>1.12.2</junit.platform.version>
         <junit.jupiter.version>5.12.2</junit.jupiter.version>
         <selenium.version>4.32.0</selenium.version>
+        <allure.version>2.29.1</allure.version>
         <slf4j.version>2.0.17</slf4j.version>
         <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
@@ -49,6 +50,13 @@
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Allure Report for reporting: JUnit 5 integration -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
         </dependency>
 
         <!-- SLF4J for logging -->
