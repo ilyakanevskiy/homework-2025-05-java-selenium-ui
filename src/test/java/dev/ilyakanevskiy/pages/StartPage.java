@@ -54,4 +54,10 @@ public class StartPage {
     public boolean areControlsAvailable() {
         return isControlEnabled(getLoginField()) && isControlEnabled(getPasswordField()) && isControlEnabled(getStayLoggedInField()) && isControlEnabled(getSubmitButton());
     }
+
+    public void performLogin(String login, String password) {
+        getLoginField().sendKeys(login);
+        getPasswordField().sendKeys(password);
+        getSubmitButton().click();
+    }
 }

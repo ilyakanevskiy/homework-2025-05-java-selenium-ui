@@ -56,4 +56,8 @@ public class SeleniumHelper {
             return false;
         }
     }
+
+    public static WebDriverWait waitFor(WebDriver driver) {
+        return new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
+    }
 }

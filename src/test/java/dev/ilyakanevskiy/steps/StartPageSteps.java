@@ -1,5 +1,6 @@
 package dev.ilyakanevskiy.steps;
 
+import dev.ilyakanevskiy.config.User;
 import dev.ilyakanevskiy.pages.StartPage;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -35,6 +36,11 @@ public class StartPageSteps {
         Assertions.assertTrue(startPage.areControlsAvailable(), CheckControls.ASSERTION);
     }
 
+    public void performLogin(User user) {
+        logger.info(PerformLogin.DESCRIPTION, user);
+        startPage.performLogin(user.username(), user.password());
+    }
+
     private static class Open {
         private static final String DESCRIPTION = "Opening start page";
     }
@@ -47,5 +53,9 @@ public class StartPageSteps {
     private static class CheckControls {
         private static final String DESCRIPTION = "Verifying login controls";
         private static final String ASSERTION = "Login controls ('Login', 'Password' or 'Stay logged in' inputs, or 'Login' button) are not available.";
+    }
+
+    private static class PerformLogin {
+        private static final String DESCRIPTION = "Attempting to log in with username: {}";
     }
 }
