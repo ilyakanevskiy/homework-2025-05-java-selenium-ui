@@ -13,7 +13,7 @@ public class ConcludeCourseByProgressTest extends BaseTest {
     public void learnerCompletesCourseByPassingAllMedia() {
         userSteps.loginAsLearner(User.LEARNER1);
         userSteps.openCatalogue();
-        userSteps.findCourse(TestData.COURSE_DEVOPS_SEARCH_PHRASE, TestData.COURSE_DEVOPS_FULLNAME);
+        userSteps.selectCourse(TestData.COURSE_DEVOPS_SEARCH_PHRASE, TestData.COURSE_DEVOPS_FULLNAME);
     }
 
     @AfterEach

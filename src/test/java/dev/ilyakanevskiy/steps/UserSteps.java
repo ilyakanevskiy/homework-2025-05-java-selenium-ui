@@ -15,6 +15,7 @@ public class UserSteps {
     private final StartPageSteps startPageSteps;
     private final HomePageSteps homePageSteps;
     private final CataloguePageSteps cataloguePageSteps;
+    private final CoursePageSteps coursePageSteps;
 
     private boolean loggedIn = false;
 
@@ -22,6 +23,7 @@ public class UserSteps {
         this.startPageSteps = new StartPageSteps(new StartPage(driver));
         this.homePageSteps = new HomePageSteps(new HomePage(driver));
         this.cataloguePageSteps = new CataloguePageSteps(new CataloguePage(driver));
+        this.coursePageSteps = new CoursePageSteps(new CoursePage(driver));
     }
 
     @Step("Open start page")
@@ -46,11 +48,16 @@ public class UserSteps {
         cataloguePageSteps.checkControls();
     }
 
-    @Step("Find course")
-    public void findCourse(String searchPhrase, String expectedCourseName) {
+    @Step("Select course")
+    public void selectCourse(String searchPhrase, String expectedCourseName) {
         cataloguePageSteps.searchForCourse(searchPhrase);
         cataloguePageSteps.checkLoadingIsComplete();
         cataloguePageSteps.checkSearchResult(expectedCourseName);
+        cataloguePageSteps.goToCourse();
+        coursePageSteps.checkLoadingIsComplete();
+        coursePageSteps.checkProperties(expectedCourseName);
+        coursePageSteps.checkBreadcrumbs();
+        coursePageSteps.checkControls();
     }
 
     @Step("Log out")

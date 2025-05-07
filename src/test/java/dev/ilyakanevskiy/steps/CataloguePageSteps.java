@@ -40,6 +40,12 @@ public class CataloguePageSteps {
         Assertions.assertTrue(cataloguePage.checkSearchResult(expectedCourseName), CheckSearchResult.ASSERTION);
     }
 
+    @Step(GoToCourse.DESCRIPTION)
+    public void goToCourse() {
+        logger.info(adaptPlaceholder(GoToCourse.DESCRIPTION));
+        cataloguePage.goToCourse();
+    }
+
     private static class CheckLoadingIsComplete {
         private static final String DESCRIPTION = "Verifying catalogue content";
         private static final String ASSERTION = "Catalogue content is not available.";
@@ -57,5 +63,9 @@ public class CataloguePageSteps {
     private static class CheckSearchResult {
         private static final String DESCRIPTION = "Verifying catalogue contains course with name: {0}";
         private static final String ASSERTION = "Course is not found.";
+    }
+
+    private static class GoToCourse {
+        private static final String DESCRIPTION = "Attempting to go to course";
     }
 }

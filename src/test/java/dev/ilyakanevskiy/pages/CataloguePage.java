@@ -86,4 +86,8 @@ public class CataloguePage {
                 .orElse(null);
         return foundCourse != null;
     }
+
+    public void goToCourse() {
+        foundCourse.click();
+    }
 }
