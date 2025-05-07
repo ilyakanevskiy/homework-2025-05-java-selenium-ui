@@ -2,11 +2,13 @@ package dev.ilyakanevskiy.steps;
 
 import dev.ilyakanevskiy.config.User;
 import dev.ilyakanevskiy.pages.StartPage;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dev.ilyakanevskiy.config.ConfigReader.getProperty;
+import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 
 public class StartPageSteps {
     private static final Logger logger = LoggerFactory.getLogger(StartPageSteps.class);
@@ -16,8 +18,9 @@ public class StartPageSteps {
         this.startPage = startPage;
     }
 
+    @Step(Open.DESCRIPTION)
     public void open() {
-        logger.info(Open.DESCRIPTION);
+        logger.info(adaptPlaceholder(Open.DESCRIPTION));
         startPage.open(getProperty("base_url"));
     }
 
@@ -26,18 +29,21 @@ public class StartPageSteps {
         checkControls();
     }
 
+    @Step(CheckLoadingIsComplete.DESCRIPTION)
     private void checkLoadingIsComplete() {
-        logger.info(CheckLoadingIsComplete.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckLoadingIsComplete.DESCRIPTION));
         Assertions.assertTrue(startPage.isLoadingComplete(), CheckLoadingIsComplete.ASSERTION);
     }
 
+    @Step(CheckControls.DESCRIPTION)
     private void checkControls() {
-        logger.info(CheckControls.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckControls.DESCRIPTION));
         Assertions.assertTrue(startPage.areControlsAvailable(), CheckControls.ASSERTION);
     }
 
+    @Step(PerformLogin.DESCRIPTION)
     public void performLogin(User user) {
-        logger.info(PerformLogin.DESCRIPTION, user);
+        logger.info(adaptPlaceholder(PerformLogin.DESCRIPTION), user);
         startPage.performLogin(user.username(), user.password());
     }
 
@@ -56,6 +62,6 @@ public class StartPageSteps {
     }
 
     private static class PerformLogin {
-        private static final String DESCRIPTION = "Attempting to log in with username: {}";
+        private static final String DESCRIPTION = "Attempting to log in with username: {0}";
     }
 }

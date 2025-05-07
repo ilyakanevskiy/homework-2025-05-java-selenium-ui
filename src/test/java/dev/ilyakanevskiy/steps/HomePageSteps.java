@@ -1,9 +1,12 @@
 package dev.ilyakanevskiy.steps;
 
 import dev.ilyakanevskiy.pages.HomePage;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 
 public class HomePageSteps {
     private static final Logger logger = LoggerFactory.getLogger(HomePageSteps.class);
@@ -13,28 +16,33 @@ public class HomePageSteps {
         this.homePage = homePage;
     }
 
+    @Step(CheckLoadingIsComplete.DESCRIPTION)
     public void checkLoadingIsComplete() {
-        logger.info(CheckLoadingIsComplete.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckLoadingIsComplete.DESCRIPTION));
         Assertions.assertTrue(homePage.isLoadingComplete(), CheckLoadingIsComplete.ASSERTION);
     }
 
+    @Step(CheckNavigationPanel.DESCRIPTION)
     public void checkNavigationPanel() {
-        logger.info(CheckNavigationPanel.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckNavigationPanel.DESCRIPTION));
         Assertions.assertTrue(homePage.isNavigationPanelAvailable(), CheckNavigationPanel.ASSERTION);
     }
 
+    @Step(CheckLearnerControls.DESCRIPTION)
     public void checkLearnerControls() {
-        logger.info(CheckLearnerControls.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckLearnerControls.DESCRIPTION));
         Assertions.assertTrue(homePage.areLearnerControlsAvailable(), CheckLearnerControls.ASSERTION);
     }
 
+    @Step(GoToCatalogue.DESCRIPTION)
     public void goToCatalogue() {
-        logger.info(GoToCatalogue.DESCRIPTION);
+        logger.info(adaptPlaceholder(GoToCatalogue.DESCRIPTION));
         homePage.goToCatalogue();
     }
 
+    @Step(PerformLogout.DESCRIPTION)
     public void performLogout() {
-        logger.info(PerformLogout.DESCRIPTION);
+        logger.info(adaptPlaceholder(PerformLogout.DESCRIPTION));
         homePage.performLogout();
     }
 

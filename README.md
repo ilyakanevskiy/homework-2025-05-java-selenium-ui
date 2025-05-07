@@ -4,7 +4,7 @@ UI test automation.
 
 ## Stack
 
-Java 21, Maven, Selenium 4, JUnit 5
+Java 21, Maven, Selenium 4, JUnit 5, Allure
 
 ## Setup
 
@@ -14,4 +14,5 @@ Copy `src/test/resources/config.local.properties.example` to `config.local.prope
 
 ```
 mvn test
+allure serve target/allure-results
 ```

@@ -1,9 +1,12 @@
 package dev.ilyakanevskiy.steps;
 
 import dev.ilyakanevskiy.pages.CataloguePage;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 
 public class CataloguePageSteps {
     private static final Logger logger = LoggerFactory.getLogger(CataloguePageSteps.class);
@@ -13,23 +16,27 @@ public class CataloguePageSteps {
         this.cataloguePage = cataloguePage;
     }
 
+    @Step(CheckLoadingIsComplete.DESCRIPTION)
     public void checkLoadingIsComplete() {
-        logger.info(CheckLoadingIsComplete.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckLoadingIsComplete.DESCRIPTION));
         Assertions.assertTrue(cataloguePage.isLoadingComplete(), CheckLoadingIsComplete.ASSERTION);
     }
 
+    @Step(CheckControls.DESCRIPTION)
     public void checkControls() {
-        logger.info(CheckControls.DESCRIPTION);
+        logger.info(adaptPlaceholder(CheckControls.DESCRIPTION));
         Assertions.assertTrue(cataloguePage.areControlsAvailable(), CheckControls.ASSERTION);
     }
 
+    @Step(SearchForCourse.DESCRIPTION)
     public void searchForCourse(String searchPhrase) {
-        logger.info(SearchForCourse.DESCRIPTION, searchPhrase);
+        logger.info(adaptPlaceholder(SearchForCourse.DESCRIPTION), searchPhrase);
         cataloguePage.searchForCourse(searchPhrase);
     }
 
+    @Step(CheckSearchResult.DESCRIPTION)
     public void checkSearchResult(String expectedCourseName) {
-        logger.info(CheckSearchResult.DESCRIPTION, expectedCourseName);
+        logger.info(adaptPlaceholder(CheckSearchResult.DESCRIPTION), expectedCourseName);
         Assertions.assertTrue(cataloguePage.checkSearchResult(expectedCourseName), CheckSearchResult.ASSERTION);
     }
 
@@ -44,11 +51,11 @@ public class CataloguePageSteps {
     }
 
     private static class SearchForCourse {
-        private static final String DESCRIPTION = "Attempting to search for course with phrase: {}";
+        private static final String DESCRIPTION = "Attempting to search for course with phrase: {0}";
     }
 
     private static class CheckSearchResult {
-        private static final String DESCRIPTION = "Verifying catalogue contains course with name: {}";
+        private static final String DESCRIPTION = "Verifying catalogue contains course with name: {0}";
         private static final String ASSERTION = "Course is not found.";
     }
 }
