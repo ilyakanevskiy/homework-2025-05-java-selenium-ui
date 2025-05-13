@@ -7,7 +7,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
+import java.util.Optional;
+
+import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 
 public class StartPage {
     private static final String LOGIN_PANEL_ID = "dashboard-login-panel-160";
@@ -31,20 +34,24 @@ public class StartPage {
         driver.get(url);
     }
 
-    private WebElement getLoginField() {
-        return loginPanel.findElement(By.id(LOGIN_FIELD_ID));
+    private Optional<WebElement> findInLoginPanel(By locator) {
+        return subElementOf(loginPanel, locator);
     }
 
-    private WebElement getPasswordField() {
-        return loginPanel.findElement(By.id(PASSWORD_FIELD_ID));
+    private Optional<WebElement> getLoginField() {
+        return findInLoginPanel(By.id(LOGIN_FIELD_ID));
     }
 
-    private WebElement getStayLoggedInField() {
-        return loginPanel.findElement(By.cssSelector(STAY_LOGGED_IN_FIELD_CSS));
+    private Optional<WebElement> getPasswordField() {
+        return findInLoginPanel(By.id(PASSWORD_FIELD_ID));
     }
 
-    private WebElement getSubmitButton() {
-        return loginPanel.findElement(By.cssSelector(SUBMIT_BUTTON_CSS));
+    private Optional<WebElement> getStayLoggedInField() {
+        return findInLoginPanel(By.cssSelector(STAY_LOGGED_IN_FIELD_CSS));
+    }
+
+    private Optional<WebElement> getSubmitButton() {
+        return findInLoginPanel(By.cssSelector(SUBMIT_BUTTON_CSS));
     }
 
     public boolean isLoadingComplete() {
@@ -52,15 +59,16 @@ public class StartPage {
     }
 
     public boolean areControlsAvailable() {
-        return isControlEnabled(getLoginField()) && isControlEnabled(getPasswordField()) && isControlEnabled(getStayLoggedInField()) && isControlEnabled(getSubmitButton());
+        return getLoginField().map(SeleniumHelper::isControlEnabled).orElse(false) && getPasswordField().map(SeleniumHelper::isControlEnabled).orElse(false) && getStayLoggedInField().map(SeleniumHelper::isControlEnabled).orElse(false) && getSubmitButton().map(SeleniumHelper::isControlEnabled).orElse(false);
     }
 
     public void performLogin(String login, String password) {
-        getLoginField().sendKeys(login);
-        getPasswordField().sendKeys(password);
-        if (!getStayLoggedInField().isSelected()) {
-            getStayLoggedInField().click();
+        required(getLoginField(), "Login field").sendKeys(login);
+        required(getPasswordField(), "Password field").sendKeys(password);
+        WebElement stayLoggedInField = required(getStayLoggedInField(), "'Stay logged in' checkbox");
+        if (!stayLoggedInField.isSelected()) {
+            stayLoggedInField.click();
         }
-        getSubmitButton().click();
+        required(getSubmitButton(), "Login button").click();
     }
 }

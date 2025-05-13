@@ -1,5 +1,8 @@
 package dev.ilyakanevskiy.utils;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -8,6 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 public class SeleniumHelper {
     private static final long DEFAULT_TIMEOUT_SECONDS = 20;
@@ -16,11 +20,19 @@ public class SeleniumHelper {
     }
 
     public static boolean isElementDisplayed(WebElement element) {
-        return element.isDisplayed();
+        try {
+            return element.isDisplayed();
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            return false;
+        }
     }
 
-    public static boolean isControlEnabled(WebElement field) {
-        return field.isDisplayed() && field.isEnabled();
+    public static boolean isControlEnabled(WebElement control) {
+        try {
+            return control.isDisplayed() && control.isEnabled();
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            return false;
+        }
     }
 
     private static void waitForLoadingComplete(WebDriver driver, WebElement element, long timeoutInSeconds) {
@@ -59,5 +71,17 @@ public class SeleniumHelper {
 
     public static WebDriverWait waitFor(WebDriver driver) {
         return new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
+    }
+
+    public static Optional<WebElement> subElementOf(WebElement parent, By locator) {
+        try {
+            return parent.findElements(locator).stream().findFirst();
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static WebElement required(Optional<WebElement> element, String description) {
+        return element.orElseThrow(() -> new NoSuchElementException(description + " not found"));
     }
 }

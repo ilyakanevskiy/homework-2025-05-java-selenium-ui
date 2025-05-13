@@ -1,7 +1,6 @@
 package dev.ilyakanevskiy.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -10,8 +9,11 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
@@ -36,8 +38,6 @@ public class CataloguePage {
     @FindBy(id = SEARCH_BUTTON_ID)
     private WebElement searchButton;
 
-    private WebElement foundCourse;
-
     public CataloguePage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
@@ -49,21 +49,11 @@ public class CataloguePage {
 
     public boolean isLoadingComplete() {
         try {
-            waitForLoadingComplete();
+            waitFor(driver).until(driver -> isElementDisplayed(listItemElement) || isElementDisplayed(noContentElement));
             return true;
         } catch (TimeoutException e) {
             return false;
         }
-    }
-
-    public void waitForLoadingComplete() {
-        waitFor(driver).until(driver -> {
-            try {
-                return (Boolean) (listItemElement.isDisplayed() || noContentElement.isDisplayed());
-            } catch (NoSuchElementException | StaleElementReferenceException e) {
-                return (Boolean) false;
-            }
-        });
     }
 
     public void searchForCourse(String searchPhrase) {
@@ -75,18 +65,23 @@ public class CataloguePage {
         }
     }
 
-    public boolean checkSearchResult(String expectedCourseName) {
-        foundCourse = driver.findElements(By.cssSelector(LIST_ITEM_CSS)).stream()
+    private Optional<WebElement> findCourseTile(String courseName) {
+        return driver.findElements(By.cssSelector(LIST_ITEM_CSS)).stream()
                 .filter(element -> element
                         .findElement(By.cssSelector(LIST_TITLE_CSS))
                         .getText()
-                        .equals(expectedCourseName))
-                .findFirst()
-                .orElse(null);
-        return foundCourse != null;
+                        .equals(courseName))
+                .findFirst();
     }
 
-    public void goToCourse() {
-        foundCourse.click();
+    public boolean checkSearchResult(String expectedCourseName) {
+        return findCourseTile(expectedCourseName).isPresent();
+    }
+
+    public void goToCourse(String courseName) {
+        waitFor(driver).ignoring(StaleElementReferenceException.class).until(driver -> {
+            required(findCourseTile(courseName), "Course tile '" + courseName + "'").click();
+            return true;
+        });
     }
 }

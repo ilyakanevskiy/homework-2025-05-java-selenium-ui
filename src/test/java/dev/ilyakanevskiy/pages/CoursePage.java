@@ -7,8 +7,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
+import java.util.Optional;
+
+import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static java.util.Arrays.asList;
 
 public class CoursePage {
@@ -42,53 +43,44 @@ public class CoursePage {
     }
 
     public boolean isLoadingComplete() {
-        return SeleniumHelper.isLoadingComplete(driver, asList(
-                courseDescriptionLeftElement,
-                courseDescriptionRightElement,
-                courseHeaderLeftElement,
-                courseHeaderRightElement
-        ));
+        return SeleniumHelper.isLoadingComplete(driver, asList(courseDescriptionLeftElement, courseDescriptionRightElement, courseHeaderLeftElement, courseHeaderRightElement));
     }
 
-    private WebElement getCourseTitle() {
-        return courseHeaderLeftElement.findElement(By.cssSelector(COURSE_TITLE_CSS));
+    private Optional<WebElement> getCourseTitle() {
+        return subElementOf(courseHeaderLeftElement, By.cssSelector(COURSE_TITLE_CSS));
     }
 
-    private WebElement getCourseType() {
-        return courseHeaderLeftElement.findElement(By.cssSelector(COURSE_TYPE_CSS));
+    private Optional<WebElement> getCourseType() {
+        return subElementOf(courseHeaderLeftElement, By.cssSelector(COURSE_TYPE_CSS));
     }
 
-    private WebElement getCourseImage() {
-        return courseHeaderRightElement.findElement(By.cssSelector(COURSE_IMAGE_CSS));
+    private Optional<WebElement> getCourseImage() {
+        return subElementOf(courseHeaderRightElement, By.cssSelector(COURSE_IMAGE_CSS));
     }
 
-    private WebElement getBreadcrumbsItem() {
-        return courseHeaderLeftElement.findElement(By.cssSelector(BREADCRUMBS_ITEM_CSS));
+    private Optional<WebElement> getBreadcrumbsItem() {
+        return subElementOf(courseHeaderLeftElement, By.cssSelector(BREADCRUMBS_ITEM_CSS));
     }
 
-    private WebElement getEnrolButton() {
-        return courseDescriptionRightElement.findElement(By.cssSelector(ENROL_BUTTON_CSS));
+    private Optional<WebElement> getEnrolButton() {
+        return subElementOf(courseDescriptionRightElement, By.cssSelector(ENROL_BUTTON_CSS));
     }
 
-    private WebElement getAddToWishListButton() {
-        return courseDescriptionRightElement.findElement(By.cssSelector(ADD_TO_WISH_LIST_BUTTON_CSS));
+    private Optional<WebElement> getAddToWishListButton() {
+        return subElementOf(courseDescriptionRightElement, By.cssSelector(ADD_TO_WISH_LIST_BUTTON_CSS));
     }
-
 
     public boolean arePropertiesAvailable(String expectedCourseName) {
-        WebElement courseTitle = getCourseTitle();
-        WebElement courseImage = getCourseImage();
-        WebElement courseType = getCourseType();
-        return isElementDisplayed(courseTitle) && courseTitle.getText().equals(expectedCourseName)
-                && isElementDisplayed(courseImage) && courseImage.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")
-                && isElementDisplayed(courseType) && !courseType.getText().isBlank();
+        return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText).map(expectedCourseName::equals).orElse(false)
+                && getCourseImage().filter(SeleniumHelper::isElementDisplayed).map(image -> image.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")).orElse(false)
+                && getCourseType().filter(SeleniumHelper::isElementDisplayed).map(type -> !type.getText().isBlank()).orElse(false);
     }
 
     public boolean areBreadcrumbsAvailable() {
-        return isElementDisplayed(getBreadcrumbsItem());
+        return getBreadcrumbsItem().map(SeleniumHelper::isElementDisplayed).orElse(false);
     }
 
     public boolean areControlsAvailable() {
-        return isControlEnabled(getEnrolButton()) && isControlEnabled(getAddToWishListButton());
+        return getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false) && getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false);
     }
 }
