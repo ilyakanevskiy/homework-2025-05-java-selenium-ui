@@ -14,7 +14,9 @@ import java.util.Optional;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
+import static java.util.Map.entry;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class CataloguePage {
@@ -22,7 +24,9 @@ public class CataloguePage {
     private static final String LIST_TITLE_CSS = "div.imc-list-title";
     private static final String NO_CONTENT_CSS = "div.no-content-page";
     private static final String SEARCH_FIELD_ID = "searchField";
+    private static final String SEARCH_FIELD_NAME = "'Search' input";
     private static final String SEARCH_BUTTON_ID = "startSearchBtn";
+    private static final String SEARCH_BUTTON_NAME = "'Search' button";
 
     private final WebDriver driver;
 
@@ -43,8 +47,10 @@ public class CataloguePage {
         PageFactory.initElements(driver, this);
     }
 
-    public boolean areControlsAvailable() {
-        return isControlEnabled(searchField) && isControlEnabled(searchButton);
+    public List<String> getUnavailableControls() {
+        return unavailableOf(
+                entry(SEARCH_FIELD_NAME, isControlEnabled(searchField)),
+                entry(SEARCH_BUTTON_NAME, isControlEnabled(searchButton)));
     }
 
     public boolean isLoadingComplete() {

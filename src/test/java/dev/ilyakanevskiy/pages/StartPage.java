@@ -7,17 +7,24 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static java.util.Map.entry;
 
 public class StartPage {
     private static final String LOGIN_PANEL_ID = "dashboard-login-panel-160";
     private static final String LOGIN_FIELD_ID = "externalForm:login";
+    private static final String LOGIN_FIELD_NAME = "'Login' input";
     private static final String PASSWORD_FIELD_ID = "externalForm:password";
+    private static final String PASSWORD_FIELD_NAME = "'Password' input";
     private static final String STAY_LOGGED_IN_FIELD_CSS = "input.login-panel__checkbox__checkbox[name='externalForm:stay-logged-in-checkbox'][type='checkbox']";
+    private static final String STAY_LOGGED_IN_FIELD_NAME = "'Stay logged in' checkbox";
     private static final String SUBMIT_BUTTON_CSS = "button[type='submit']";
+    private static final String SUBMIT_BUTTON_NAME = "'Login' button";
     private static final long LOADING_TIMEOUT_SECONDS = 10;
 
     private final WebDriver driver;
@@ -58,13 +65,17 @@ public class StartPage {
         return SeleniumHelper.isLoadingComplete(driver, loginPanel, LOADING_TIMEOUT_SECONDS);
     }
 
-    public boolean areControlsAvailable() {
-        return getLoginField().map(SeleniumHelper::isControlEnabled).orElse(false) && getPasswordField().map(SeleniumHelper::isControlEnabled).orElse(false) && getStayLoggedInField().map(SeleniumHelper::isControlEnabled).orElse(false) && getSubmitButton().map(SeleniumHelper::isControlEnabled).orElse(false);
+    public List<String> getUnavailableControls() {
+        return unavailableOf(
+                entry(LOGIN_FIELD_NAME, getLoginField().map(SeleniumHelper::isControlEnabled).orElse(false)),
+                entry(PASSWORD_FIELD_NAME, getPasswordField().map(SeleniumHelper::isControlEnabled).orElse(false)),
+                entry(STAY_LOGGED_IN_FIELD_NAME, getStayLoggedInField().map(SeleniumHelper::isControlEnabled).orElse(false)),
+                entry(SUBMIT_BUTTON_NAME, getSubmitButton().map(SeleniumHelper::isControlEnabled).orElse(false)));
     }
 
     public void performLogin(String login, String password) {
-        required(getLoginField(), "Login field").sendKeys(login);
-        required(getPasswordField(), "Password field").sendKeys(password);
-        required(getSubmitButton(), "Login button").click();
+        required(getLoginField(), LOGIN_FIELD_NAME).sendKeys(login);
+        required(getPasswordField(), PASSWORD_FIELD_NAME).sendKeys(password);
+        required(getSubmitButton(), SUBMIT_BUTTON_NAME).click();
     }
 }

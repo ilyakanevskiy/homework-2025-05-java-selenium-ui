@@ -7,10 +7,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
 import static java.util.Arrays.asList;
+import static java.util.Map.entry;
 
 public class CoursePage {
     private static final String COURSE_DESCRIPTION_LEFT_CSS = "div.description__left";
@@ -20,11 +23,15 @@ public class CoursePage {
 
     private static final String COURSE_TITLE_CSS = "div.imc-header__title-wrapper__title";
     private static final String COURSE_TYPE_CSS = "span.imc-header__label__text";
+    private static final String COURSE_TYPE_NAME = "Course type";
     private static final String COURSE_IMAGE_CSS = "div.imc-header-right-side__image div.imc-container";
+    private static final String COURSE_IMAGE_NAME = "Course image";
     private static final String BACKGROUND_IMAGE_PROPERTY = "background-image";
     private static final String BREADCRUMBS_ITEM_CSS = "button.header-breadcrumbs__item__link";
     private static final String ENROL_BUTTON_CSS = "button[title='Enrol']";
+    private static final String ENROL_BUTTON_NAME = "'Enrol' button";
     private static final String ADD_TO_WISH_LIST_BUTTON_CSS = "button[title='Add to wish list']";
+    private static final String ADD_TO_WISH_LIST_BUTTON_NAME = "'Add to wish list' button";
 
     private final WebDriver driver;
 
@@ -70,17 +77,23 @@ public class CoursePage {
         return subElementOf(courseDescriptionRightElement, By.cssSelector(ADD_TO_WISH_LIST_BUTTON_CSS));
     }
 
-    public boolean arePropertiesAvailable(String expectedCourseName) {
-        return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText).map(expectedCourseName::equals).orElse(false)
-                && getCourseImage().filter(SeleniumHelper::isElementDisplayed).map(image -> image.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")).orElse(false)
-                && getCourseType().filter(SeleniumHelper::isElementDisplayed).map(type -> !type.getText().isBlank()).orElse(false);
+    public Optional<String> getCourseName() {
+        return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText);
+    }
+
+    public List<String> getUnavailableProperties() {
+        return unavailableOf(
+                entry(COURSE_IMAGE_NAME, getCourseImage().filter(SeleniumHelper::isElementDisplayed).map(image -> image.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")).orElse(false)),
+                entry(COURSE_TYPE_NAME, getCourseType().filter(SeleniumHelper::isElementDisplayed).map(type -> !type.getText().isBlank()).orElse(false)));
     }
 
     public boolean areBreadcrumbsAvailable() {
         return getBreadcrumbsItem().map(SeleniumHelper::isElementDisplayed).orElse(false);
     }
 
-    public boolean areControlsAvailable() {
-        return getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false) && getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false);
+    public List<String> getUnavailableControls() {
+        return unavailableOf(
+                entry(ENROL_BUTTON_NAME, getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false)),
+                entry(ADD_TO_WISH_LIST_BUTTON_NAME, getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false)));
     }
 }

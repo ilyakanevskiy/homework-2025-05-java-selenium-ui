@@ -11,7 +11,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class SeleniumHelper {
     private static final long DEFAULT_TIMEOUT_SECONDS = 20;
@@ -33,6 +35,14 @@ public class SeleniumHelper {
         } catch (NoSuchElementException | StaleElementReferenceException e) {
             return false;
         }
+    }
+
+    @SafeVarargs
+    public static List<String> unavailableOf(Map.Entry<String, Boolean>... elements) {
+        return Stream.of(elements)
+                .filter(element -> !element.getValue())
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     private static void waitForLoadingComplete(WebDriver driver, WebElement element, long timeoutInSeconds) {

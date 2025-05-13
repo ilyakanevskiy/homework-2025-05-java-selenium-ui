@@ -2,11 +2,11 @@ package dev.ilyakanevskiy.steps;
 
 import dev.ilyakanevskiy.pages.HomePage;
 import io.qameta.allure.Step;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HomePageSteps {
     private static final Logger logger = LoggerFactory.getLogger(HomePageSteps.class);
@@ -19,19 +19,19 @@ public class HomePageSteps {
     @Step(CheckLoadingIsComplete.DESCRIPTION)
     public void checkLoadingIsComplete() {
         logger.info(adaptPlaceholder(CheckLoadingIsComplete.DESCRIPTION));
-        Assertions.assertTrue(homePage.isLoadingComplete(), CheckLoadingIsComplete.ASSERTION);
+        assertThat(homePage.isLoadingComplete()).as(CheckLoadingIsComplete.ASSERTION).isTrue();
     }
 
     @Step(CheckNavigationPanel.DESCRIPTION)
     public void checkNavigationPanel() {
         logger.info(adaptPlaceholder(CheckNavigationPanel.DESCRIPTION));
-        Assertions.assertTrue(homePage.isNavigationPanelAvailable(), CheckNavigationPanel.ASSERTION);
+        assertThat(homePage.isNavigationPanelAvailable()).as(CheckNavigationPanel.ASSERTION).isTrue();
     }
 
     @Step(CheckLearnerControls.DESCRIPTION)
     public void checkLearnerControls() {
         logger.info(adaptPlaceholder(CheckLearnerControls.DESCRIPTION));
-        Assertions.assertTrue(homePage.areLearnerControlsAvailable(), CheckLearnerControls.ASSERTION);
+        assertThat(homePage.getUnavailableLearnerControls()).as(CheckLearnerControls.ASSERTION).isEmpty();
     }
 
     @Step(GoToCatalogue.DESCRIPTION)
@@ -48,17 +48,17 @@ public class HomePageSteps {
 
     private static class CheckLoadingIsComplete {
         private static final String DESCRIPTION = "Verifying home page content";
-        private static final String ASSERTION = "Home page content is not available.";
+        private static final String ASSERTION = "Home page content should be available.";
     }
 
     private static class CheckNavigationPanel {
         private static final String DESCRIPTION = "Verifying navigation panel";
-        private static final String ASSERTION = "Navigation panel is not available.";
+        private static final String ASSERTION = "Navigation panel should be available.";
     }
 
     private static class CheckLearnerControls {
         private static final String DESCRIPTION = "Verifying learner controls";
-        private static final String ASSERTION = "Learner controls are not available.";
+        private static final String ASSERTION = "Learner controls should be available.";
     }
 
     private static class GoToCatalogue {

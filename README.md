@@ -4,7 +4,7 @@ UI test automation.
 
 ## Stack
 
-Java 21, Maven, Selenium 4, JUnit 5, Allure
+Java 21, Maven, Selenium 4, JUnit 5, AssertJ, Allure
 
 ## Setup
 

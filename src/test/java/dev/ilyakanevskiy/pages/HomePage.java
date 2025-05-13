@@ -7,17 +7,22 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static java.util.Map.entry;
 
 public class HomePage {
     private static final String DASHBOARDS_SECTION_ID = "dashboards-section";
     private static final String NAVIGATION_PANEL_ID = "navigationRoot";
     private static final String PROFILE_BUTTON_CSS = "button[title='User profile folder']";
+    private static final String PROFILE_BUTTON_NAME = "'User profile' button";
     private static final String CATALOGUE_BUTTON_CSS = "a[title='Catalogue']";
+    private static final String CATALOGUE_BUTTON_NAME = "'Catalogue' button";
     private static final String SIGN_OUT_BUTTON_CSS = "a[title='Sign out']";
 
     private final WebDriver driver;
@@ -48,9 +53,10 @@ public class HomePage {
         return isElementDisplayed(navigationPanel);
     }
 
-    public boolean areLearnerControlsAvailable() {
-        return getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)
-                && getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false);
+    public List<String> getUnavailableLearnerControls() {
+        return unavailableOf(
+                entry(PROFILE_BUTTON_NAME, getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)),
+                entry(CATALOGUE_BUTTON_NAME, getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
     }
 
     public boolean isLoadingComplete() {
@@ -58,11 +64,11 @@ public class HomePage {
     }
 
     public void goToCatalogue() {
-        required(getCatalogueButton(), "Catalogue button").click();
+        required(getCatalogueButton(), CATALOGUE_BUTTON_NAME).click();
     }
 
     public void performLogout() {
-        required(getProfileButton(), "User profile button").click();
+        required(getProfileButton(), PROFILE_BUTTON_NAME).click();
         signOutButton.click();
     }
 }
