@@ -21,13 +21,13 @@ public class WebdriverExtension implements ParameterResolver, BeforeEachCallback
     }
 
     @Override
-    public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) throws ParameterResolutionException {
+    public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext context) throws ParameterResolutionException {
         return parameterContext.getParameter().getType() == WebDriver.class;
     }
 
     @Override
-    public WebDriver resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) throws ParameterResolutionException {
-        final ExtensionContext.Store store = extensionContext.getStore(NAMESPACE);
+    public WebDriver resolveParameter(final ParameterContext parameterContext, final ExtensionContext context) throws ParameterResolutionException {
+        final ExtensionContext.Store store = context.getStore(NAMESPACE);
         return store.get(WEBDRIVER, WebDriver.class);
     }
 
@@ -52,10 +52,10 @@ public class WebdriverExtension implements ParameterResolver, BeforeEachCallback
 
     @Override
     public void afterEach(final ExtensionContext context) {
-        final WebDriver maybeDriver = getWebDriver(context);
-        if (Objects.nonNull(maybeDriver)) {
+        final WebDriver driver = getWebDriver(context);
+        if (Objects.nonNull(driver)) {
             logger.info("Closing WebDriver");
-            maybeDriver.quit();
+            driver.quit();
         }
     }
 }

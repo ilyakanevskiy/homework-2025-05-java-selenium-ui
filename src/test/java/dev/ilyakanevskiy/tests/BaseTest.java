@@ -8,11 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 
 @ExtendWith({WebdriverExtension.class, AutoScreenshotExtension.class})
-public class BaseTest {
+public abstract class BaseTest {
     protected UserSteps userSteps;
 
     @BeforeEach
-    public void setup(WebDriver driver) {
+    void setup(WebDriver driver) {
         driver.manage().window().maximize();
         userSteps = new UserSteps(driver);
         userSteps.openStartPage();
