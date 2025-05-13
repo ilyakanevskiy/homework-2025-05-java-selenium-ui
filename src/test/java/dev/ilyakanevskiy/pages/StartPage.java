@@ -57,6 +57,10 @@ public class StartPage {
         return findInLoginPanel(By.cssSelector(SUBMIT_BUTTON_CSS));
     }
 
+    public String getTitle() {
+        return driver.getTitle();
+    }
+
     public boolean isLoadingComplete() {
         return SeleniumHelper.isLoadingComplete(driver, loginPanel, LOADING_TIMEOUT_SECONDS);
     }
