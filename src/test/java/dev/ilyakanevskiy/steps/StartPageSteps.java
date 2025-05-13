@@ -21,7 +21,13 @@ public class StartPageSteps {
     @Step(Open.DESCRIPTION)
     public void open() {
         logger.info(adaptPlaceholder(Open.DESCRIPTION));
-        startPage.open(getProperty("base_url"));
+        String url = getProperty("base_url");
+        startPage.open(url);
+        checkServerResponse(url);
+    }
+
+    private void checkServerResponse(String url) {
+        assertThat(startPage.getTitle()).as(CheckServerResponse.ASSERTION, url).doesNotMatch(CheckServerResponse.SERVER_ERROR_TITLE);
     }
 
     public void checkStartPage() {
@@ -49,6 +55,11 @@ public class StartPageSteps {
 
     private static class Open {
         private static final String DESCRIPTION = "Opening start page";
+    }
+
+    private static class CheckServerResponse {
+        private static final String ASSERTION = "Server should respond without an error at URL: %s";
+        private static final String SERVER_ERROR_TITLE = "(5\\d\\d|404) .*";
     }
 
     private static class CheckLoadingIsComplete {
