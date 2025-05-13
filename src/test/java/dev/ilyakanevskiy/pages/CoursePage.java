@@ -7,10 +7,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
 import static java.util.Arrays.asList;
+import static java.util.Map.entry;
 
 public class CoursePage {
     private static final String COURSE_DESCRIPTION_LEFT_CSS = "div.description__left";
@@ -70,17 +73,23 @@ public class CoursePage {
         return subElementOf(courseDescriptionRightElement, By.cssSelector(ADD_TO_WISH_LIST_BUTTON_CSS));
     }
 
-    public boolean arePropertiesAvailable(String expectedCourseName) {
-        return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText).map(expectedCourseName::equals).orElse(false)
-                && getCourseImage().filter(SeleniumHelper::isElementDisplayed).map(image -> image.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")).orElse(false)
-                && getCourseType().filter(SeleniumHelper::isElementDisplayed).map(type -> !type.getText().isBlank()).orElse(false);
+    public Optional<String> getCourseName() {
+        return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText);
+    }
+
+    public List<String> getUnavailableProperties() {
+        return unavailableOf(
+                entry("Course image", getCourseImage().filter(SeleniumHelper::isElementDisplayed).map(image -> image.getCssValue(BACKGROUND_IMAGE_PROPERTY).startsWith("url(")).orElse(false)),
+                entry("Course type", getCourseType().filter(SeleniumHelper::isElementDisplayed).map(type -> !type.getText().isBlank()).orElse(false)));
     }
 
     public boolean areBreadcrumbsAvailable() {
         return getBreadcrumbsItem().map(SeleniumHelper::isElementDisplayed).orElse(false);
     }
 
-    public boolean areControlsAvailable() {
-        return getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false) && getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false);
+    public List<String> getUnavailableControls() {
+        return unavailableOf(
+                entry("'Enrol' button", getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false)),
+                entry("'Add to wish list' button", getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false)));
     }
 }

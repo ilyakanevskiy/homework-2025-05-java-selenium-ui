@@ -14,7 +14,9 @@ import java.util.Optional;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
+import static java.util.Map.entry;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class CataloguePage {
@@ -43,8 +45,10 @@ public class CataloguePage {
         PageFactory.initElements(driver, this);
     }
 
-    public boolean areControlsAvailable() {
-        return isControlEnabled(searchField) && isControlEnabled(searchButton);
+    public List<String> getUnavailableControls() {
+        return unavailableOf(
+                entry("'Search' input", isControlEnabled(searchField)),
+                entry("'Search' button", isControlEnabled(searchButton)));
     }
 
     public boolean isLoadingComplete() {

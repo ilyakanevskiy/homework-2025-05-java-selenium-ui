@@ -7,11 +7,14 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static java.util.Map.entry;
 
 public class HomePage {
     private static final String DASHBOARDS_SECTION_ID = "dashboards-section";
@@ -53,14 +56,16 @@ public class HomePage {
         return isElementDisplayed(navigationPanel);
     }
 
-    public boolean areLearnerControlsAvailable() {
-        return getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)
-                && getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false);
+    public List<String> getUnavailableLearnerControls() {
+        return unavailableOf(
+                entry("'User profile' button", getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)),
+                entry("'Catalogue' button", getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
     }
 
-    public boolean areAdminControlsAvailable() {
-        return getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)
-                && getCategoriesButton().map(SeleniumHelper::isElementDisplayed).orElse(false);
+    public List<String> getUnavailableAdminControls() {
+        return unavailableOf(
+                entry("'User profile' button", getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)),
+                entry("'Categories switch' button", getCategoriesButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
     }
 
     public boolean isLoadingComplete() {
