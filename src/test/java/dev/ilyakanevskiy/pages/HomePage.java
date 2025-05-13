@@ -7,11 +7,15 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.Optional;
+
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 
 public class HomePage {
     private static final String DASHBOARDS_SECTION_ID = "dashboards-section";
-    private static final String NAVI_PANEL_ID = "navigationRoot";
+    private static final String NAVIGATION_PANEL_ID = "navigationRoot";
     private static final String PROFILE_BUTTON_CSS = "button[title='User profile folder']";
     private static final String CATALOGUE_BUTTON_CSS = "a[title='Catalogue']";
     private static final String SIGN_OUT_BUTTON_CSS = "a[title='Sign out']";
@@ -21,8 +25,8 @@ public class HomePage {
     @FindBy(id = DASHBOARDS_SECTION_ID)
     private WebElement dashboardsSection;
 
-    @FindBy(id = NAVI_PANEL_ID)
-    private WebElement naviPanel;
+    @FindBy(id = NAVIGATION_PANEL_ID)
+    private WebElement navigationPanel;
 
     @FindBy(css = SIGN_OUT_BUTTON_CSS)
     private WebElement signOutButton;
@@ -32,20 +36,21 @@ public class HomePage {
         PageFactory.initElements(driver, this);
     }
 
-    private WebElement getProfileButton() {
-        return naviPanel.findElement(By.cssSelector(PROFILE_BUTTON_CSS));
+    private Optional<WebElement> getProfileButton() {
+        return subElementOf(navigationPanel, By.cssSelector(PROFILE_BUTTON_CSS));
     }
 
-    private WebElement getCatalogueButton() {
-        return naviPanel.findElement(By.cssSelector(CATALOGUE_BUTTON_CSS));
+    private Optional<WebElement> getCatalogueButton() {
+        return subElementOf(navigationPanel, By.cssSelector(CATALOGUE_BUTTON_CSS));
     }
 
     public boolean isNavigationPanelAvailable() {
-        return isElementDisplayed(naviPanel);
+        return isElementDisplayed(navigationPanel);
     }
 
     public boolean areLearnerControlsAvailable() {
-        return isElementDisplayed(getProfileButton());
+        return getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)
+                && getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false);
     }
 
     public boolean isLoadingComplete() {
@@ -53,11 +58,11 @@ public class HomePage {
     }
 
     public void goToCatalogue() {
-        getCatalogueButton().click();
+        required(getCatalogueButton(), "Catalogue button").click();
     }
 
     public void performLogout() {
-        getProfileButton().click();
+        required(getProfileButton(), "User profile button").click();
         signOutButton.click();
     }
 }

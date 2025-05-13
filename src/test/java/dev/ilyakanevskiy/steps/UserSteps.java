@@ -53,7 +53,7 @@ public class UserSteps {
         cataloguePageSteps.searchForCourse(searchPhrase);
         cataloguePageSteps.checkLoadingIsComplete();
         cataloguePageSteps.checkSearchResult(expectedCourseName);
-        cataloguePageSteps.goToCourse();
+        cataloguePageSteps.goToCourse(expectedCourseName);
         coursePageSteps.checkLoadingIsComplete();
         coursePageSteps.checkProperties(expectedCourseName);
         coursePageSteps.checkBreadcrumbs();

@@ -41,9 +41,9 @@ public class CataloguePageSteps {
     }
 
     @Step(GoToCourse.DESCRIPTION)
-    public void goToCourse() {
-        logger.info(adaptPlaceholder(GoToCourse.DESCRIPTION));
-        cataloguePage.goToCourse();
+    public void goToCourse(String courseName) {
+        logger.info(adaptPlaceholder(GoToCourse.DESCRIPTION), courseName);
+        cataloguePage.goToCourse(courseName);
     }
 
     private static class CheckLoadingIsComplete {
@@ -66,6 +66,6 @@ public class CataloguePageSteps {
     }
 
     private static class GoToCourse {
-        private static final String DESCRIPTION = "Attempting to go to course";
+        private static final String DESCRIPTION = "Attempting to go to course: {0}";
     }
 }
