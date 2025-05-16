@@ -14,16 +14,26 @@ import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
+import static java.lang.String.format;
 import static java.util.Map.entry;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 
 public class HomePage {
     private static final String DASHBOARDS_SECTION_ID = "dashboards-section";
     private static final String NAVIGATION_PANEL_ID = "navigationRoot";
     private static final String PROFILE_BUTTON_CSS = "button[title='User profile folder']";
     private static final String PROFILE_BUTTON_NAME = "'User profile' button";
+    private static final String CATEGORIES_BUTTON_CSS = "button[title='Categories switch']";
+    private static final String CATEGORIES_BUTTON_NAME = "'Categories switch' button";
     private static final String CATALOGUE_BUTTON_CSS = "a[title='Catalogue']";
     private static final String CATALOGUE_BUTTON_NAME = "'Catalogue' button";
     private static final String SIGN_OUT_BUTTON_CSS = "a[title='Sign out']";
+    private static final String SEARCH_BUTTON_CSS = "button[title='Search']";
+    private static final String SEARCH_BUTTON_NAME = "'Search' button";
+    private static final String SEARCH_NAVIGATION_FIELD_CSS = "input[placeholder='Search']";
+    private static final String SEARCH_NAVIGATION_RESULT_XPATH = "//a[.//span[text()='%s']]";
+    private static final String CLOSE_NOTIFICATION_CSS = "a[title='Close notification']";
 
     private final WebDriver driver;
 
@@ -45,8 +55,16 @@ public class HomePage {
         return subElementOf(navigationPanel, By.cssSelector(PROFILE_BUTTON_CSS));
     }
 
+    private Optional<WebElement> getCategoriesButton() {
+        return subElementOf(navigationPanel, By.cssSelector(CATEGORIES_BUTTON_CSS));
+    }
+
     private Optional<WebElement> getCatalogueButton() {
         return subElementOf(navigationPanel, By.cssSelector(CATALOGUE_BUTTON_CSS));
+    }
+
+    private Optional<WebElement> getSearchButton() {
+        return subElementOf(navigationPanel, By.cssSelector(SEARCH_BUTTON_CSS));
     }
 
     public boolean isNavigationPanelAvailable() {
@@ -59,16 +77,38 @@ public class HomePage {
                 entry(CATALOGUE_BUTTON_NAME, getCatalogueButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
     }
 
+    public List<String> getUnavailableAdminControls() {
+        return unavailableOf(
+                entry(PROFILE_BUTTON_NAME, getProfileButton().map(SeleniumHelper::isElementDisplayed).orElse(false)),
+                entry(CATEGORIES_BUTTON_NAME, getCategoriesButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
+    }
+
     public boolean isLoadingComplete() {
         return SeleniumHelper.isLoadingComplete(driver, dashboardsSection);
+    }
+
+    // The welcome notification stays open after login and can cover menu items. It is closed before a menu
+    // is opened, because a click outside an open menu closes the menu.
+    private void closeNotifications() {
+        driver.findElements(By.cssSelector(CLOSE_NOTIFICATION_CSS)).stream()
+                .filter(SeleniumHelper::isElementDisplayed)
+                .forEach(WebElement::click);
     }
 
     public void goToCatalogue() {
         required(getCatalogueButton(), CATALOGUE_BUTTON_NAME).click();
     }
 
+    public void openFromNavigationSearch(String menuItem) {
+        closeNotifications();
+        required(getSearchButton(), SEARCH_BUTTON_NAME).click();
+        waitFor(driver).until(elementToBeClickable(By.cssSelector(SEARCH_NAVIGATION_FIELD_CSS))).sendKeys(menuItem);
+        waitFor(driver).until(elementToBeClickable(By.xpath(format(SEARCH_NAVIGATION_RESULT_XPATH, menuItem)))).click();
+    }
+
     public void performLogout() {
+        closeNotifications();
         required(getProfileButton(), PROFILE_BUTTON_NAME).click();
-        signOutButton.click();
+        waitFor(driver).until(elementToBeClickable(signOutButton)).click();
     }
 }

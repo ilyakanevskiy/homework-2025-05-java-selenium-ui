@@ -34,10 +34,22 @@ public class HomePageSteps {
         assertThat(homePage.getUnavailableLearnerControls()).as(CheckLearnerControls.ASSERTION).isEmpty();
     }
 
+    @Step(CheckAdminControls.DESCRIPTION)
+    public void checkAdminControls() {
+        logger.info(adaptPlaceholder(CheckAdminControls.DESCRIPTION));
+        assertThat(homePage.getUnavailableAdminControls()).as(CheckAdminControls.ASSERTION).isEmpty();
+    }
+
     @Step(GoToCatalogue.DESCRIPTION)
     public void goToCatalogue() {
         logger.info(adaptPlaceholder(GoToCatalogue.DESCRIPTION));
         homePage.goToCatalogue();
+    }
+
+    @Step(OpenFromNavigationSearch.DESCRIPTION)
+    public void openFromNavigationSearch(String menuItem) {
+        logger.info(adaptPlaceholder(OpenFromNavigationSearch.DESCRIPTION), menuItem);
+        homePage.openFromNavigationSearch(menuItem);
     }
 
     @Step(PerformLogout.DESCRIPTION)
@@ -61,8 +73,17 @@ public class HomePageSteps {
         private static final String ASSERTION = "Learner controls should be available.";
     }
 
+    private static class CheckAdminControls {
+        private static final String DESCRIPTION = "Verifying admin controls";
+        private static final String ASSERTION = "Admin controls should be available.";
+    }
+
     private static class GoToCatalogue {
         private static final String DESCRIPTION = "Attempting to go to catalogue";
+    }
+
+    private static class OpenFromNavigationSearch {
+        private static final String DESCRIPTION = "Attempting to open from navigation search: {0}";
     }
 
     public static class PerformLogout {
