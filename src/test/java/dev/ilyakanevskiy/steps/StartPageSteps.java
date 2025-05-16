@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static dev.ilyakanevskiy.config.ConfigReader.getProperty;
+import static dev.ilyakanevskiy.config.TestData.INVALID_PASSWORD;
 import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,9 +49,15 @@ public class StartPageSteps {
     }
 
     @Step(PerformLogin.DESCRIPTION)
-    public void performLogin(User user) {
-        logger.info(adaptPlaceholder(PerformLogin.DESCRIPTION), user);
+    public void performLogin(User user, int attemptNumber) {
+        logger.info(adaptPlaceholder(PerformLogin.DESCRIPTION), attemptNumber, user);
         startPage.performLogin(user.username(), user.password());
+    }
+
+    @Step(PerformLoginWithInvalidPassword.DESCRIPTION)
+    public void performLoginWithInvalidPassword(User user, int attemptNumber) {
+        logger.info(adaptPlaceholder(PerformLoginWithInvalidPassword.DESCRIPTION), attemptNumber, user);
+        startPage.performLogin(user.username(), INVALID_PASSWORD);
     }
 
     private static class Open {
@@ -73,6 +80,10 @@ public class StartPageSteps {
     }
 
     private static class PerformLogin {
-        private static final String DESCRIPTION = "Attempting to log in with username: {0}";
+        private static final String DESCRIPTION = "Attempt: {1} to log in with username: {0}";
+    }
+
+    private static class PerformLoginWithInvalidPassword {
+        private static final String DESCRIPTION = "Attempt: {1} to log in with username: {0} and an invalid password";
     }
 }

@@ -13,7 +13,9 @@ import java.util.Optional;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static java.util.Map.entry;
+import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class StartPage {
     private static final String LOGIN_PANEL_ID = "dashboard-login-panel-160";
@@ -80,6 +82,10 @@ public class StartPage {
         if (!stayLoggedInField.isSelected()) {
             stayLoggedInField.click();
         }
-        required(getSubmitButton(), "Login button").click();
+        WebElement submitButton = required(getSubmitButton(), "Login button");
+        submitButton.click();
+        // Home reuses the ids of the start page's dashboards section and navigation panel: without this wait,
+        // the checks after login could pass on the start page.
+        waitFor(driver).until(stalenessOf(submitButton));
     }
 }

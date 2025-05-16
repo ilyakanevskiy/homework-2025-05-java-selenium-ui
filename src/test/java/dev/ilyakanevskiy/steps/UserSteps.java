@@ -16,6 +16,7 @@ public class UserSteps {
     private final HomePageSteps homePageSteps;
     private final CataloguePageSteps cataloguePageSteps;
     private final CoursePageSteps coursePageSteps;
+    private final LoginPageSteps loginPageSteps;
 
     private boolean loggedIn = false;
 
@@ -24,6 +25,7 @@ public class UserSteps {
         this.homePageSteps = new HomePageSteps(new HomePage(driver));
         this.cataloguePageSteps = new CataloguePageSteps(new CataloguePage(driver));
         this.coursePageSteps = new CoursePageSteps(new CoursePage(driver));
+        this.loginPageSteps = new LoginPageSteps(new LoginPage(driver));
     }
 
     @Step("Open start page")
@@ -34,7 +36,8 @@ public class UserSteps {
 
     @Step("Login as learner")
     public void loginAsLearner(User user) {
-        startPageSteps.performLogin(user);
+        startPageSteps.performLogin(user, 1);
+        loginPageSteps.checkLoginAccepted();
         homePageSteps.checkLoadingIsComplete();
         homePageSteps.checkNavigationPanel();
         homePageSteps.checkLearnerControls();
@@ -43,11 +46,23 @@ public class UserSteps {
 
     @Step("Login as admin")
     public void loginAsAdmin(User user) {
-        startPageSteps.performLogin(user);
+        startPageSteps.performLogin(user, 1);
+        loginPageSteps.checkLoginAccepted();
         homePageSteps.checkLoadingIsComplete();
         homePageSteps.checkNavigationPanel();
         homePageSteps.checkAdminControls();
         loggedIn = true;
+    }
+
+    @Step("Try to login with invalid credentials")
+    public void tryToLoginWithInvalidCredentials(User user, int attemptNumber) {
+        if (attemptNumber > 1) {
+            startPageSteps.open();
+            startPageSteps.checkStartPage();
+        }
+        startPageSteps.performLoginWithInvalidPassword(user, attemptNumber);
+        loginPageSteps.checkLoadingIsComplete();
+        loginPageSteps.checkErrorMessageIsDisplayed();
     }
 
     @Step("Open catalogue")
