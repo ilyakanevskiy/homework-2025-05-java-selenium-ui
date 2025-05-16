@@ -13,7 +13,9 @@ import java.util.Optional;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static java.util.Map.entry;
+import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class StartPage {
     private static final String LOGIN_PANEL_ID = "dashboard-login-panel-160";
@@ -80,6 +82,10 @@ public class StartPage {
     public void performLogin(String login, String password) {
         required(getLoginField(), LOGIN_FIELD_NAME).sendKeys(login);
         required(getPasswordField(), PASSWORD_FIELD_NAME).sendKeys(password);
-        required(getSubmitButton(), SUBMIT_BUTTON_NAME).click();
+        WebElement submitButton = required(getSubmitButton(), SUBMIT_BUTTON_NAME);
+        submitButton.click();
+        // Home reuses the ids of the start page's dashboards section and navigation panel: without this wait,
+        // the checks after login could pass on the start page.
+        waitFor(driver).until(stalenessOf(submitButton));
     }
 }
