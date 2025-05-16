@@ -2,6 +2,8 @@ package dev.ilyakanevskiy.pages;
 
 import dev.ilyakanevskiy.utils.SeleniumHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -9,9 +11,12 @@ import org.openqa.selenium.support.PageFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static java.util.Arrays.asList;
 import static java.util.Map.entry;
 
@@ -28,6 +33,7 @@ public class CoursePage {
     private static final String BREADCRUMBS_ITEM_CSS = "button.header-breadcrumbs__item__link";
     private static final String ENROL_BUTTON_CSS = "button[title='Enrol']";
     private static final String ADD_TO_WISH_LIST_BUTTON_CSS = "button[title='Add to wish list']";
+    private static final String REMOVE_FROM_WISH_LIST_BUTTON_CSS = "button[title='Remove from wish list']";
 
     private final WebDriver driver;
 
@@ -73,6 +79,19 @@ public class CoursePage {
         return subElementOf(courseDescriptionRightElement, By.cssSelector(ADD_TO_WISH_LIST_BUTTON_CSS));
     }
 
+    private Optional<WebElement> getRemoveFromWishListButton() {
+        return subElementOf(courseDescriptionRightElement, By.cssSelector(REMOVE_FROM_WISH_LIST_BUTTON_CSS));
+    }
+
+    private boolean isButtonAvailable(Supplier<Optional<WebElement>> button) {
+        try {
+            return waitFor(driver).ignoring(StaleElementReferenceException.class)
+                    .until(driver -> button.get().map(SeleniumHelper::isControlEnabled).orElse(false));
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
     public Optional<String> getCourseName() {
         return getCourseTitle().filter(SeleniumHelper::isElementDisplayed).map(WebElement::getText);
     }
@@ -91,5 +110,21 @@ public class CoursePage {
         return unavailableOf(
                 entry("'Enrol' button", getEnrolButton().map(SeleniumHelper::isControlEnabled).orElse(false)),
                 entry("'Add to wish list' button", getAddToWishListButton().map(SeleniumHelper::isControlEnabled).orElse(false)));
+    }
+
+    public boolean isAddToWishListAvailable() {
+        return isButtonAvailable(this::getAddToWishListButton);
+    }
+
+    public boolean isRemoveFromWishListAvailable() {
+        return isButtonAvailable(this::getRemoveFromWishListButton);
+    }
+
+    public void addToWishList() {
+        required(getAddToWishListButton(), "'Add to wish list' button").click();
+    }
+
+    public void removeFromWishList() {
+        required(getRemoveFromWishListButton(), "'Remove from wish list' button").click();
     }
 }

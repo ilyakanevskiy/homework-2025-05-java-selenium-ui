@@ -19,6 +19,7 @@ public class UserSteps {
     private final CoursePageSteps coursePageSteps;
     private final LoginPageSteps loginPageSteps;
     private final DenialOfAccessPageSteps denialOfAccessPageSteps;
+    private final LearningStatusPageSteps learningStatusPageSteps;
 
     private boolean loggedIn = false;
 
@@ -29,6 +30,7 @@ public class UserSteps {
         this.coursePageSteps = new CoursePageSteps(new CoursePage(driver));
         this.loginPageSteps = new LoginPageSteps(new LoginPage(driver));
         this.denialOfAccessPageSteps = new DenialOfAccessPageSteps(new DenialOfAccessPage(driver));
+        this.learningStatusPageSteps = new LearningStatusPageSteps(new LearningStatusPage(driver));
     }
 
     @Step("Open start page")
@@ -105,6 +107,35 @@ public class UserSteps {
         coursePageSteps.checkProperties(expectedCourseName);
         coursePageSteps.checkBreadcrumbs();
         coursePageSteps.checkControls();
+    }
+
+    @Step("Add course to wishlist")
+    public void addCourseToWishlist() {
+        coursePageSteps.addToWishList();
+        coursePageSteps.checkRemoveFromWishListIsAvailable();
+    }
+
+    @Step("Open learning status")
+    public void openLearningStatus() {
+        homePageSteps.goToLearningStatus();
+        learningStatusPageSteps.checkLoadingIsComplete();
+        learningStatusPageSteps.checkTabs();
+    }
+
+    @Step("Open course from wishlist")
+    public void openCourseFromWishlist(String courseName) {
+        learningStatusPageSteps.openWishlist();
+        learningStatusPageSteps.checkCourseIsListed(courseName);
+        learningStatusPageSteps.openCourse(courseName);
+        coursePageSteps.checkLoadingIsComplete();
+        coursePageSteps.checkProperties(courseName);
+        coursePageSteps.checkRemoveFromWishListIsAvailable();
+    }
+
+    @Step("Remove course from wishlist")
+    public void removeCourseFromWishlist() {
+        coursePageSteps.removeFromWishList();
+        coursePageSteps.checkAddToWishListIsAvailable();
     }
 
     @Step("Logout")

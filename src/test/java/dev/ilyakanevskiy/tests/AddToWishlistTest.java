@@ -14,6 +14,11 @@ public class AddToWishlistTest extends BaseTest {
         userSteps.loginAsLearner(User.LEARNER2);
         userSteps.openCatalogue();
         userSteps.selectCourse(TestData.COURSE_SD_SEARCH_PHRASE, TestData.COURSE_SD_FULLNAME);
+        userSteps.addCourseToWishlist();
+        userSteps.openLearningStatus();
+        userSteps.openCourseFromWishlist(TestData.COURSE_SD_FULLNAME);
+        userSteps.removeCourseFromWishlist();
+        userSteps.logout();
     }
 
     @AfterEach

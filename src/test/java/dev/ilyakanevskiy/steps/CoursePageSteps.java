@@ -41,6 +41,30 @@ public class CoursePageSteps {
         assertThat(coursePage.getUnavailableControls()).as(CheckControls.ASSERTION).isEmpty();
     }
 
+    @Step(AddToWishList.DESCRIPTION)
+    public void addToWishList() {
+        logger.info(adaptPlaceholder(AddToWishList.DESCRIPTION));
+        coursePage.addToWishList();
+    }
+
+    @Step(CheckRemoveFromWishList.DESCRIPTION)
+    public void checkRemoveFromWishListIsAvailable() {
+        logger.info(adaptPlaceholder(CheckRemoveFromWishList.DESCRIPTION));
+        assertThat(coursePage.isRemoveFromWishListAvailable()).as(CheckRemoveFromWishList.ASSERTION).isTrue();
+    }
+
+    @Step(RemoveFromWishList.DESCRIPTION)
+    public void removeFromWishList() {
+        logger.info(adaptPlaceholder(RemoveFromWishList.DESCRIPTION));
+        coursePage.removeFromWishList();
+    }
+
+    @Step(CheckAddToWishList.DESCRIPTION)
+    public void checkAddToWishListIsAvailable() {
+        logger.info(adaptPlaceholder(CheckAddToWishList.DESCRIPTION));
+        assertThat(coursePage.isAddToWishListAvailable()).as(CheckAddToWishList.ASSERTION).isTrue();
+    }
+
     private static class CheckLoadingIsComplete {
         private static final String DESCRIPTION = "Verifying course content";
         private static final String ASSERTION = "Course content should be available.";
@@ -60,5 +84,23 @@ public class CoursePageSteps {
     private static class CheckControls {
         private static final String DESCRIPTION = "Verifying course controls";
         private static final String ASSERTION = "Course controls ('Enrol' and 'Add to wish list' buttons) should be available.";
+    }
+
+    private static class AddToWishList {
+        private static final String DESCRIPTION = "Attempting to add course to wish list";
+    }
+
+    private static class CheckRemoveFromWishList {
+        private static final String DESCRIPTION = "Verifying 'Remove from wish list' button";
+        private static final String ASSERTION = "'Remove from wish list' button should be available for a course in the wish list.";
+    }
+
+    private static class RemoveFromWishList {
+        private static final String DESCRIPTION = "Attempting to remove course from wish list";
+    }
+
+    private static class CheckAddToWishList {
+        private static final String DESCRIPTION = "Verifying 'Add to wish list' button";
+        private static final String ASSERTION = "'Add to wish list' button should be available for a course not in the wish list.";
     }
 }

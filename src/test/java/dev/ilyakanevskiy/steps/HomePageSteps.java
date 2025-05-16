@@ -46,6 +46,12 @@ public class HomePageSteps {
         homePage.goToCatalogue();
     }
 
+    @Step(GoToLearningStatus.DESCRIPTION)
+    public void goToLearningStatus() {
+        logger.info(adaptPlaceholder(GoToLearningStatus.DESCRIPTION));
+        homePage.goToLearningStatus();
+    }
+
     @Step(OpenFromNavigationSearch.DESCRIPTION)
     public void openFromNavigationSearch(String menuItem) {
         logger.info(adaptPlaceholder(OpenFromNavigationSearch.DESCRIPTION), menuItem);
@@ -80,6 +86,10 @@ public class HomePageSteps {
 
     private static class GoToCatalogue {
         private static final String DESCRIPTION = "Attempting to go to catalogue";
+    }
+
+    private static class GoToLearningStatus {
+        private static final String DESCRIPTION = "Attempting to go to learning status";
     }
 
     private static class OpenFromNavigationSearch {
