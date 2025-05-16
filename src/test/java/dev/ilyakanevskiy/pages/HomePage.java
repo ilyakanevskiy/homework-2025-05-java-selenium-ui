@@ -14,7 +14,10 @@ import static dev.ilyakanevskiy.utils.SeleniumHelper.isElementDisplayed;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.subElementOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
+import static java.lang.String.format;
 import static java.util.Map.entry;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 
 public class HomePage {
     private static final String DASHBOARDS_SECTION_ID = "dashboards-section";
@@ -23,6 +26,10 @@ public class HomePage {
     private static final String CATEGORIES_BUTTON_CSS = "button[title='Categories switch']";
     private static final String CATALOGUE_BUTTON_CSS = "a[title='Catalogue']";
     private static final String SIGN_OUT_BUTTON_CSS = "a[title='Sign out']";
+    private static final String SEARCH_BUTTON_CSS = "button[title='Search']";
+    private static final String SEARCH_NAVIGATION_FIELD_CSS = "input[placeholder='Search navigation']";
+    private static final String SEARCH_NAVIGATION_RESULT_CSS = "a.search-option span[title='%s']";
+    private static final String CLOSE_NOTIFICATION_CSS = "a[title='Close notification']";
 
     private final WebDriver driver;
 
@@ -52,6 +59,10 @@ public class HomePage {
         return subElementOf(navigationPanel, By.cssSelector(CATALOGUE_BUTTON_CSS));
     }
 
+    private Optional<WebElement> getSearchButton() {
+        return subElementOf(navigationPanel, By.cssSelector(SEARCH_BUTTON_CSS));
+    }
+
     public boolean isNavigationPanelAvailable() {
         return isElementDisplayed(navigationPanel);
     }
@@ -72,8 +83,23 @@ public class HomePage {
         return SeleniumHelper.isLoadingComplete(driver, dashboardsSection);
     }
 
+    // The welcome notification stays open after login and can cover menu items. It is closed before a menu
+    // is opened, because a click outside an open menu closes the menu.
+    private void closeNotifications() {
+        driver.findElements(By.cssSelector(CLOSE_NOTIFICATION_CSS)).stream()
+                .filter(SeleniumHelper::isElementDisplayed)
+                .forEach(WebElement::click);
+    }
+
     public void goToCatalogue() {
         required(getCatalogueButton(), "Catalogue button").click();
+    }
+
+    public void openFromNavigationSearch(String menuItem) {
+        closeNotifications();
+        required(getSearchButton(), "Search button").click();
+        waitFor(driver).until(elementToBeClickable(By.cssSelector(SEARCH_NAVIGATION_FIELD_CSS))).sendKeys(menuItem);
+        waitFor(driver).until(elementToBeClickable(By.cssSelector(format(SEARCH_NAVIGATION_RESULT_CSS, menuItem)))).click();
     }
 
     public void performLogout() {

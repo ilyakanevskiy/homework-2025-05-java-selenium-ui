@@ -46,6 +46,12 @@ public class HomePageSteps {
         homePage.goToCatalogue();
     }
 
+    @Step(OpenFromNavigationSearch.DESCRIPTION)
+    public void openFromNavigationSearch(String menuItem) {
+        logger.info(adaptPlaceholder(OpenFromNavigationSearch.DESCRIPTION), menuItem);
+        homePage.openFromNavigationSearch(menuItem);
+    }
+
     @Step(PerformLogout.DESCRIPTION)
     public void performLogout() {
         logger.info(adaptPlaceholder(PerformLogout.DESCRIPTION));
@@ -74,6 +80,10 @@ public class HomePageSteps {
 
     private static class GoToCatalogue {
         private static final String DESCRIPTION = "Attempting to go to catalogue";
+    }
+
+    private static class OpenFromNavigationSearch {
+        private static final String DESCRIPTION = "Attempting to open from navigation search: {0}";
     }
 
     public static class PerformLogout {

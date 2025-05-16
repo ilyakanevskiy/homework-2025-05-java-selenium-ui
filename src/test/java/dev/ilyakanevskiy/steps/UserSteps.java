@@ -11,12 +11,14 @@ import static dev.ilyakanevskiy.steps.HomePageSteps.PerformLogout.RESULT;
 
 public class UserSteps {
     private static final Logger logger = LoggerFactory.getLogger(UserSteps.class);
+    private static final String DENIAL_OF_ACCESS_MENU_ITEM = "Denial of access";
 
     private final StartPageSteps startPageSteps;
     private final HomePageSteps homePageSteps;
     private final CataloguePageSteps cataloguePageSteps;
     private final CoursePageSteps coursePageSteps;
     private final LoginPageSteps loginPageSteps;
+    private final DenialOfAccessPageSteps denialOfAccessPageSteps;
 
     private boolean loggedIn = false;
 
@@ -26,6 +28,7 @@ public class UserSteps {
         this.cataloguePageSteps = new CataloguePageSteps(new CataloguePage(driver));
         this.coursePageSteps = new CoursePageSteps(new CoursePage(driver));
         this.loginPageSteps = new LoginPageSteps(new LoginPage(driver));
+        this.denialOfAccessPageSteps = new DenialOfAccessPageSteps(new DenialOfAccessPage(driver));
     }
 
     @Step("Open start page")
@@ -56,13 +59,33 @@ public class UserSteps {
 
     @Step("Try to login with invalid credentials")
     public void tryToLoginWithInvalidCredentials(User user, int attemptNumber) {
+        attemptLogin(user, attemptNumber);
+        loginPageSteps.checkErrorMessageIsDisplayed();
+    }
+
+    @Step("Try to login as blocked user")
+    public void tryToLoginAsBlockedUser(User user, int attemptNumber) {
+        attemptLogin(user, attemptNumber);
+        loginPageSteps.checkBlockedUserMessageIsDisplayed();
+    }
+
+    private void attemptLogin(User user, int attemptNumber) {
         if (attemptNumber > 1) {
-            startPageSteps.open();
-            startPageSteps.checkStartPage();
+            openStartPage();
         }
         startPageSteps.performLoginWithInvalidPassword(user, attemptNumber);
         loginPageSteps.checkLoadingIsComplete();
-        loginPageSteps.checkErrorMessageIsDisplayed();
+    }
+
+    @Step("Reset failed login attempts")
+    public void resetFailedLoginAttempts(String username, int minimumAttempts) {
+        homePageSteps.openFromNavigationSearch(DENIAL_OF_ACCESS_MENU_ITEM);
+        denialOfAccessPageSteps.checkLoadingIsComplete();
+        denialOfAccessPageSteps.searchUser(username);
+        denialOfAccessPageSteps.checkFailedLoginAttempts(username, minimumAttempts);
+        denialOfAccessPageSteps.resetFailedLoginAttempts(username);
+        denialOfAccessPageSteps.searchUser(username);
+        denialOfAccessPageSteps.checkUserIsNotListed(username);
     }
 
     @Step("Open catalogue")

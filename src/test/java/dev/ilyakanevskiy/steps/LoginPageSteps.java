@@ -5,6 +5,7 @@ import io.qameta.allure.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static dev.ilyakanevskiy.config.TestData.BLOCKED_USER_MESSAGE;
 import static dev.ilyakanevskiy.config.TestData.INVALID_CREDENTIALS_MESSAGE;
 import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,12 @@ public class LoginPageSteps {
         assertThat(loginPage.getErrorMessage()).as(CheckLoginAccepted.ASSERTION).isEmpty();
     }
 
+    @Step(CheckBlockedUserMessage.DESCRIPTION)
+    public void checkBlockedUserMessageIsDisplayed() {
+        logger.info(adaptPlaceholder(CheckBlockedUserMessage.DESCRIPTION));
+        assertThat(loginPage.getErrorMessage()).as(CheckBlockedUserMessage.ASSERTION).hasValue(BLOCKED_USER_MESSAGE);
+    }
+
     private static class CheckLoadingIsComplete {
         private static final String DESCRIPTION = "Verifying login section";
         private static final String ASSERTION = "Login section should be available.";
@@ -48,5 +55,10 @@ public class LoginPageSteps {
     private static class CheckLoginAccepted {
         private static final String DESCRIPTION = "Verifying login is accepted";
         private static final String ASSERTION = "Login should be accepted without an error message.";
+    }
+
+    private static class CheckBlockedUserMessage {
+        private static final String DESCRIPTION = "Verifying blocked user message";
+        private static final String ASSERTION = "Blocked user message should be displayed after too many failed login attempts.";
     }
 }
