@@ -41,6 +41,12 @@ public class CoursePageSteps {
         assertThat(coursePage.getUnavailableControls()).as(CheckControls.ASSERTION).isEmpty();
     }
 
+    @Step(IsInWishList.DESCRIPTION)
+    public boolean isInWishList() {
+        logger.info(adaptPlaceholder(IsInWishList.DESCRIPTION));
+        return coursePage.isInWishList();
+    }
+
     @Step(AddToWishList.DESCRIPTION)
     public void addToWishList() {
         logger.info(adaptPlaceholder(AddToWishList.DESCRIPTION));
@@ -84,6 +90,10 @@ public class CoursePageSteps {
     private static class CheckControls {
         private static final String DESCRIPTION = "Verifying course controls";
         private static final String ASSERTION = "Course controls ('Enrol' and 'Add to wish list' buttons) should be available.";
+    }
+
+    private static class IsInWishList {
+        private static final String DESCRIPTION = "Checking whether course is in wish list";
     }
 
     private static class AddToWishList {

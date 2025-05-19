@@ -39,6 +39,11 @@ public class StartPage {
         driver.get(url);
     }
 
+    public void openInNewSession(String url) {
+        driver.manage().deleteAllCookies();
+        driver.get(url);
+    }
+
     private Optional<WebElement> findInLoginPanel(By locator) {
         return subElementOf(loginPanel, locator);
     }

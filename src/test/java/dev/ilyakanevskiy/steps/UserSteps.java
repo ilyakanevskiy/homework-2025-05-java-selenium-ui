@@ -39,6 +39,13 @@ public class UserSteps {
         startPageSteps.checkStartPage();
     }
 
+    @Step("Start new session")
+    public void startNewSession() {
+        startPageSteps.openInNewSession();
+        startPageSteps.checkStartPage();
+        loggedIn = false;
+    }
+
     @Step("Login as learner")
     public void loginAsLearner(User user) {
         startPageSteps.performLogin(user, 1);
@@ -81,10 +88,29 @@ public class UserSteps {
 
     @Step("Reset failed login attempts")
     public void resetFailedLoginAttempts(String username, int minimumAttempts) {
-        homePageSteps.openFromNavigationSearch(DENIAL_OF_ACCESS_MENU_ITEM);
-        denialOfAccessPageSteps.checkLoadingIsComplete();
+        openDenialOfAccessManager();
         denialOfAccessPageSteps.searchUser(username);
         denialOfAccessPageSteps.checkFailedLoginAttempts(username, minimumAttempts);
+        resetListedUser(username);
+    }
+
+    @Step("Reset failed login attempts if there are any")
+    public void resetFailedLoginAttemptsIfAny(User admin, User user) {
+        loginAsAdmin(admin);
+        openDenialOfAccessManager();
+        denialOfAccessPageSteps.searchUser(user.username());
+        if (denialOfAccessPageSteps.isUserListed(user.username())) {
+            resetListedUser(user.username());
+        }
+        logout();
+    }
+
+    private void openDenialOfAccessManager() {
+        homePageSteps.openFromNavigationSearch(DENIAL_OF_ACCESS_MENU_ITEM);
+        denialOfAccessPageSteps.checkLoadingIsComplete();
+    }
+
+    private void resetListedUser(String username) {
         denialOfAccessPageSteps.resetFailedLoginAttempts(username);
         denialOfAccessPageSteps.searchUser(username);
         denialOfAccessPageSteps.checkUserIsNotListed(username);
@@ -99,14 +125,18 @@ public class UserSteps {
 
     @Step("Select course")
     public void selectCourse(String searchPhrase, String expectedCourseName) {
+        openCourseFromCatalogue(searchPhrase, expectedCourseName);
+        coursePageSteps.checkBreadcrumbs();
+        coursePageSteps.checkControls();
+    }
+
+    private void openCourseFromCatalogue(String searchPhrase, String expectedCourseName) {
         cataloguePageSteps.searchForCourse(searchPhrase);
         cataloguePageSteps.checkLoadingIsComplete();
         cataloguePageSteps.checkSearchResult(expectedCourseName);
         cataloguePageSteps.goToCourse(expectedCourseName);
         coursePageSteps.checkLoadingIsComplete();
         coursePageSteps.checkProperties(expectedCourseName);
-        coursePageSteps.checkBreadcrumbs();
-        coursePageSteps.checkControls();
     }
 
     @Step("Add course to wishlist")
@@ -136,6 +166,17 @@ public class UserSteps {
     public void removeCourseFromWishlist() {
         coursePageSteps.removeFromWishList();
         coursePageSteps.checkAddToWishListIsAvailable();
+    }
+
+    @Step("Remove course from wishlist if it is there")
+    public void removeCourseFromWishlistIfPresent(User user, String searchPhrase, String courseName) {
+        loginAsLearner(user);
+        openCatalogue();
+        openCourseFromCatalogue(searchPhrase, courseName);
+        if (coursePageSteps.isInWishList()) {
+            removeCourseFromWishlist();
+        }
+        logout();
     }
 
     @Step("Logout")

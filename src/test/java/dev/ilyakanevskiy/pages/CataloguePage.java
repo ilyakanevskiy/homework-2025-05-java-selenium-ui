@@ -79,7 +79,12 @@ public class CataloguePage {
     }
 
     public boolean checkSearchResult(String expectedCourseName) {
-        return findCourseTile(expectedCourseName).isPresent();
+        try {
+            return waitFor(driver).ignoring(StaleElementReferenceException.class)
+                    .until(driver -> findCourseTile(expectedCourseName).isPresent());
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 
     public void goToCourse(String courseName) {

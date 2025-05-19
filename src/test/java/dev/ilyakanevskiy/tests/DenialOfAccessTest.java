@@ -2,11 +2,17 @@ package dev.ilyakanevskiy.tests;
 
 import dev.ilyakanevskiy.config.User;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class DenialOfAccessTest extends BaseTest {
     private static final int FAILED_LOGIN_ATTEMPTS_TO_BLOCK = 3;
+
+    @BeforeEach
+    void restoreInitialState() {
+        assumeInitialStateRestored(this::resetFailedLoginAttemptsIfAny);
+    }
 
     @Test
     @DisplayName("Denial of access")
@@ -27,8 +33,13 @@ public class DenialOfAccessTest extends BaseTest {
 
     @AfterEach
     public void teardown() {
-        if (userSteps != null && userSteps.isLoggedIn()) {
-            userSteps.logout();
+        if (userSteps != null) {
+            userSteps.startNewSession();
+            resetFailedLoginAttemptsIfAny();
         }
+    }
+
+    private void resetFailedLoginAttemptsIfAny() {
+        userSteps.resetFailedLoginAttemptsIfAny(User.ADMIN, User.LEARNER3);
     }
 }

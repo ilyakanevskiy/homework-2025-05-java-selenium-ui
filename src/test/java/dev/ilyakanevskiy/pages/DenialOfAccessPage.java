@@ -9,8 +9,10 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.FluentWait;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
@@ -33,6 +35,7 @@ public class DenialOfAccessPage {
     private static final String RESET_SELECTED_MENU_ITEM_ID = "tbi_reset";
     private static final String DIALOG_BUTTON_CSS = ".x-window .x-btn";
     private static final String RESET_DIALOG_BUTTON_TEXT = "Reset";
+    private static final Duration SEARCH_REPEAT_INTERVAL = Duration.ofSeconds(3);
 
     private final WebDriver driver;
 
@@ -68,6 +71,11 @@ public class DenialOfAccessPage {
                 .findFirst();
     }
 
+    private boolean areOnlyMatchingRowsListed(String login) {
+        return driver.findElements(By.cssSelector(USER_ROW_CSS)).stream()
+                .allMatch(row -> getCellText(row, LOGIN_CELL_INDEX).contains(login));
+    }
+
     private static String getCellText(WebElement row, int index) {
         List<WebElement> cells = row.findElements(By.cssSelector(CELL_CSS));
         return cells.size() > index ? cells.get(index).getText().trim() : "";
@@ -85,9 +93,22 @@ public class DenialOfAccessPage {
         inManagerFrame(() -> {
             searchField.clear();
             searchField.sendKeys(login);
-            searchButton.click();
+            // A search started while the grid is still loading its initial content is lost, so repeat it until the grid is filtered.
+            AtomicBoolean searched = new AtomicBoolean(false);
+            waitForGrid().pollingEvery(SEARCH_REPEAT_INTERVAL).until(driver -> {
+                if (searched.get() && areOnlyMatchingRowsListed(login)) {
+                    return true;
+                }
+                searchButton.click();
+                searched.set(true);
+                return false;
+            });
             return null;
         });
+    }
+
+    public boolean isUserListed(String login) {
+        return inManagerFrame(() -> waitForGrid().until(driver -> Optional.of(findUserRow(login).isPresent())).get());
     }
 
     public Optional<Integer> getFailedLoginAttempts(String login) {

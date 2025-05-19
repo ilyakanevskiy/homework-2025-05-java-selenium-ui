@@ -29,6 +29,12 @@ public class DenialOfAccessPageSteps {
         denialOfAccessPage.searchUser(username);
     }
 
+    @Step(IsUserListed.DESCRIPTION)
+    public boolean isUserListed(String username) {
+        logger.info(adaptPlaceholder(IsUserListed.DESCRIPTION), username);
+        return denialOfAccessPage.isUserListed(username);
+    }
+
     @Step(CheckFailedLoginAttempts.DESCRIPTION)
     public void checkFailedLoginAttempts(String username, int minimumAttempts) {
         logger.info(adaptPlaceholder(CheckFailedLoginAttempts.DESCRIPTION), username, minimumAttempts);
@@ -57,6 +63,10 @@ public class DenialOfAccessPageSteps {
 
     private static class SearchUser {
         private static final String DESCRIPTION = "Attempting to search for user: {0}";
+    }
+
+    private static class IsUserListed {
+        private static final String DESCRIPTION = "Checking whether user is listed: {0}";
     }
 
     private static class CheckFailedLoginAttempts {
