@@ -125,6 +125,12 @@ public class CoursePage {
         return isButtonAvailable(this::getRemoveFromWishListButton);
     }
 
+    public boolean isInWishList() {
+        waitFor(driver).ignoring(StaleElementReferenceException.class)
+                .until(driver -> getAddToWishListButton().isPresent() || getRemoveFromWishListButton().isPresent());
+        return getRemoveFromWishListButton().isPresent();
+    }
+
     public void addToWishList() {
         required(getAddToWishListButton(), ADD_TO_WISH_LIST_BUTTON_NAME).click();
     }

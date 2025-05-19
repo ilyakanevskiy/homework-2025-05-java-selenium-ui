@@ -2,7 +2,6 @@ package dev.ilyakanevskiy.tests;
 
 import dev.ilyakanevskiy.config.TestData;
 import dev.ilyakanevskiy.config.User;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,10 +21,8 @@ public class AddToWishlistTest extends BaseTest {
         userSteps.logout();
     }
 
-    @AfterEach
-    public void teardown() {
-        if (userSteps != null && userSteps.isLoggedIn()) {
-            userSteps.logout();
-        }
+    @Override
+    protected void restoreInitialState() {
+        userSteps.removeCourseFromWishlistIfPresent(User.LEARNER2, TestData.COURSE_SD_SEARCH_PHRASE, TestData.COURSE_SD_FULLNAME);
     }
 }

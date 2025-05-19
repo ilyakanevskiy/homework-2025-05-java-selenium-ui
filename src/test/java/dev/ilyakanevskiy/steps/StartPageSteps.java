@@ -27,6 +27,14 @@ public class StartPageSteps {
         checkServerResponse(url);
     }
 
+    @Step(OpenInNewSession.DESCRIPTION)
+    public void openInNewSession() {
+        logger.info(adaptPlaceholder(OpenInNewSession.DESCRIPTION));
+        String url = getProperty("base_url");
+        startPage.openInNewSession(url);
+        checkServerResponse(url);
+    }
+
     private void checkServerResponse(String url) {
         assertThat(startPage.getTitle()).as(CheckServerResponse.ASSERTION, url).doesNotMatch(CheckServerResponse.SERVER_ERROR_TITLE);
     }
@@ -62,6 +70,10 @@ public class StartPageSteps {
 
     private static class Open {
         private static final String DESCRIPTION = "Opening start page";
+    }
+
+    private static class OpenInNewSession {
+        private static final String DESCRIPTION = "Opening start page in a new session";
     }
 
     private static class CheckServerResponse {

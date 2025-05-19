@@ -43,6 +43,15 @@ public class StartPage {
         driver.get(url);
     }
 
+    // A failed test can leave additional windows open and the driver in one of them, or in a window that is already closed.
+    public void openInNewSession(String url) {
+        List<String> windows = List.copyOf(driver.getWindowHandles());
+        windows.stream().skip(1).forEach(window -> driver.switchTo().window(window).close());
+        driver.switchTo().window(windows.get(0));
+        driver.manage().deleteAllCookies();
+        driver.get(url);
+    }
+
     private Optional<WebElement> findInLoginPanel(By locator) {
         return subElementOf(loginPanel, locator);
     }

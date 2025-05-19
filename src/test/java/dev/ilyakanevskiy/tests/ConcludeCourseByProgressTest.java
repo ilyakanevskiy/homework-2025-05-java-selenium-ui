@@ -16,8 +16,13 @@ public class ConcludeCourseByProgressTest extends BaseTest {
         userSteps.selectCourse(TestData.COURSE_DEVOPS_SEARCH_PHRASE, TestData.COURSE_DEVOPS_FULLNAME);
     }
 
+    // The draft only opens the course, so there is nothing to restore yet.
+    @Override
+    protected void restoreInitialState() {
+    }
+
     @AfterEach
-    public void teardown() {
+    public void logoutIfLoggedIn() {
         if (userSteps != null && userSteps.isLoggedIn()) {
             userSteps.logout();
         }
