@@ -29,6 +29,9 @@ public class HomePage {
     private static final String CATALOGUE_BUTTON_CSS = "a[title='Catalogue']";
     private static final String CATALOGUE_BUTTON_NAME = "'Catalogue' button";
     private static final String SIGN_OUT_BUTTON_CSS = "a[title='Sign out']";
+    private static final String MY_LEARNING_BUTTON_CSS = "button[title='My learning']";
+    private static final String MY_LEARNING_BUTTON_NAME = "'My learning' button";
+    private static final String LEARNING_STATUS_LINK_TEXT = "Learning status";
     private static final String SEARCH_BUTTON_CSS = "button[title='Search']";
     private static final String SEARCH_BUTTON_NAME = "'Search' button";
     private static final String SEARCH_NAVIGATION_FIELD_CSS = "input[placeholder='Search']";
@@ -61,6 +64,10 @@ public class HomePage {
 
     private Optional<WebElement> getCatalogueButton() {
         return subElementOf(navigationPanel, By.cssSelector(CATALOGUE_BUTTON_CSS));
+    }
+
+    private Optional<WebElement> getMyLearningButton() {
+        return subElementOf(navigationPanel, By.cssSelector(MY_LEARNING_BUTTON_CSS));
     }
 
     private Optional<WebElement> getSearchButton() {
@@ -97,6 +104,12 @@ public class HomePage {
 
     public void goToCatalogue() {
         required(getCatalogueButton(), CATALOGUE_BUTTON_NAME).click();
+    }
+
+    public void goToLearningStatus() {
+        closeNotifications();
+        required(getMyLearningButton(), MY_LEARNING_BUTTON_NAME).click();
+        waitFor(driver).until(elementToBeClickable(By.linkText(LEARNING_STATUS_LINK_TEXT))).click();
     }
 
     public void openFromNavigationSearch(String menuItem) {
