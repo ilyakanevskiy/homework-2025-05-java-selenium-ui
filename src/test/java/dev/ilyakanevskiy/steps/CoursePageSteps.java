@@ -47,6 +47,12 @@ public class CoursePageSteps {
         return coursePage.isInWishList();
     }
 
+    @Step(Enrol.DESCRIPTION)
+    public void enrol() {
+        logger.info(adaptPlaceholder(Enrol.DESCRIPTION));
+        coursePage.enrol();
+    }
+
     @Step(AddToWishList.DESCRIPTION)
     public void addToWishList() {
         logger.info(adaptPlaceholder(AddToWishList.DESCRIPTION));
@@ -94,6 +100,10 @@ public class CoursePageSteps {
 
     private static class IsInWishList {
         private static final String DESCRIPTION = "Checking whether course is in wish list";
+    }
+
+    private static class Enrol {
+        private static final String DESCRIPTION = "Attempting to enrol in course";
     }
 
     private static class AddToWishList {

@@ -19,6 +19,7 @@ import static dev.ilyakanevskiy.utils.SeleniumHelper.unavailableOf;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static java.util.Arrays.asList;
 import static java.util.Map.entry;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 
 public class CoursePage {
     private static final String COURSE_DESCRIPTION_LEFT_CSS = "div.description__left";
@@ -39,6 +40,7 @@ public class CoursePage {
     private static final String ADD_TO_WISH_LIST_BUTTON_NAME = "'Add to wish list' button";
     private static final String REMOVE_FROM_WISH_LIST_BUTTON_CSS = "button[title='Remove from wish list']";
     private static final String REMOVE_FROM_WISH_LIST_BUTTON_NAME = "'Remove from wish list' button";
+    private static final String ENROL_CONFIRM_BUTTON_ID = "enrolment_proceed_button";
 
     private final WebDriver driver;
 
@@ -129,6 +131,11 @@ public class CoursePage {
         waitFor(driver).ignoring(StaleElementReferenceException.class)
                 .until(driver -> getAddToWishListButton().isPresent() || getRemoveFromWishListButton().isPresent());
         return getRemoveFromWishListButton().isPresent();
+    }
+
+    public void enrol() {
+        required(getEnrolButton(), ENROL_BUTTON_NAME).click();
+        waitFor(driver).until(elementToBeClickable(By.id(ENROL_CONFIRM_BUTTON_ID))).click();
     }
 
     public void addToWishList() {
