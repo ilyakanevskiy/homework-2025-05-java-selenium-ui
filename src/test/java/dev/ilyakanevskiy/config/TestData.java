@@ -7,6 +7,11 @@ public class TestData {
 
     public static final String COURSE_DEVOPS_SEARCH_PHRASE = "DevOps Fundamentals Tools and Techniques";
     public static final String COURSE_DEVOPS_FULLNAME = "DevOps Fundamentals: Tools and Techniques for Continuous Integration and Deployment";
+    public static final String COURSE_DEVOPS_MEDIA_1 = "MOOC Bild 1";
+    public static final String COURSE_DEVOPS_MEDIA_2 = "MOOC Bild 2";
+    public static final String COURSE_HALF_PROGRESS = "50%";
+    public static final String COURSE_FULL_PROGRESS = "100%";
+    public static final String COURSE_PASSED_STATUS = "Passed";
 
     public static final String COURSE_SD_SEARCH_PHRASE = "Course SD New Course Room";
     public static final String COURSE_SD_FULLNAME = "[TD]Course SD New Course Room";

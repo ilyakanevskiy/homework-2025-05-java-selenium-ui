@@ -7,11 +7,16 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+import static dev.ilyakanevskiy.pages.ParticipantAdministrationPage.ParticipantList.CANCELLATIONS;
+import static dev.ilyakanevskiy.pages.ParticipantAdministrationPage.ParticipantList.PARTICIPANTS;
 import static dev.ilyakanevskiy.steps.HomePageSteps.PerformLogout.RESULT;
 
 public class UserSteps {
     private static final Logger logger = LoggerFactory.getLogger(UserSteps.class);
     private static final String DENIAL_OF_ACCESS_MENU_ITEM = "Denial of access";
+    private static final String ADMIN_CATEGORY = "Admin";
 
     private final StartPageSteps startPageSteps;
     private final HomePageSteps homePageSteps;
@@ -20,6 +25,9 @@ public class UserSteps {
     private final LoginPageSteps loginPageSteps;
     private final DenialOfAccessPageSteps denialOfAccessPageSteps;
     private final LearningStatusPageSteps learningStatusPageSteps;
+    private final CourseRoomPageSteps courseRoomPageSteps;
+    private final CourseManagerPageSteps courseManagerPageSteps;
+    private final ParticipantAdministrationPageSteps participantAdministrationPageSteps;
 
     private boolean loggedIn = false;
 
@@ -31,6 +39,9 @@ public class UserSteps {
         this.loginPageSteps = new LoginPageSteps(new LoginPage(driver));
         this.denialOfAccessPageSteps = new DenialOfAccessPageSteps(new DenialOfAccessPage(driver));
         this.learningStatusPageSteps = new LearningStatusPageSteps(new LearningStatusPage(driver));
+        this.courseRoomPageSteps = new CourseRoomPageSteps(new CourseRoomPage(driver));
+        this.courseManagerPageSteps = new CourseManagerPageSteps(new CourseManagerPage(driver));
+        this.participantAdministrationPageSteps = new ParticipantAdministrationPageSteps(new ParticipantAdministrationPage(driver));
     }
 
     @Step("Open start page")
@@ -179,6 +190,95 @@ public class UserSteps {
         logout();
     }
 
+    @Step("Enrol in course")
+    public void enrolInCourse() {
+        coursePageSteps.enrol();
+        courseRoomPageSteps.checkLoadingIsComplete();
+    }
+
+    @Step("Check course room")
+    public void checkCourseRoom(String courseName, List<String> mediaNames) {
+        courseRoomPageSteps.checkHeader(courseName);
+        courseRoomPageSteps.checkMedia(mediaNames);
+    }
+
+    @Step("Pass media")
+    public void passMedia(String mediaName) {
+        courseRoomPageSteps.openMedia(mediaName);
+        // TODO: check the media page: name, image, description, navigation buttons and the "passed" checkmark.
+        courseRoomPageSteps.reopen();
+        courseRoomPageSteps.checkLoadingIsComplete();
+        courseRoomPageSteps.checkMediaPassed(mediaName);
+    }
+
+    @Step("Check course progress")
+    public void checkCourseProgress(String expectedProgress) {
+        courseRoomPageSteps.checkProgress(expectedProgress);
+    }
+
+    @Step("Check course is passed")
+    public void checkCourseIsPassed(String passedStatus, String fullProgress) {
+        courseRoomPageSteps.checkStatus(passedStatus);
+        courseRoomPageSteps.checkProgress(fullProgress);
+    }
+
+    @Step("Remove participant from course")
+    public void removeParticipantFromCourse(String searchPhrase, String courseName, User learner) {
+        openParticipantAdministration(searchPhrase, courseName);
+        participantAdministrationPageSteps.searchParticipant(learner.username(), PARTICIPANTS);
+        participantAdministrationPageSteps.checkParticipantIsListed(learner.username(), PARTICIPANTS);
+        cancelParticipant(learner.username());
+        participantAdministrationPageSteps.checkParticipantIsListed(learner.username(), CANCELLATIONS);
+        removeCancelledParticipant(learner.username());
+        participantAdministrationPageSteps.saveAndClose();
+    }
+
+    @Step("Remove participant from course if enrolled")
+    public void removeParticipantFromCourseIfPresent(User admin, User learner, String searchPhrase, String courseName) {
+        loginAsAdmin(admin);
+        openParticipantAdministration(searchPhrase, courseName);
+        participantAdministrationPageSteps.searchParticipant(learner.username(), PARTICIPANTS);
+        if (participantAdministrationPageSteps.isParticipantListed(learner.username(), PARTICIPANTS)) {
+            cancelParticipant(learner.username());
+        } else {
+            openCancellationList(learner.username());
+        }
+        if (participantAdministrationPageSteps.isParticipantListed(learner.username(), CANCELLATIONS)) {
+            removeCancelledParticipant(learner.username());
+        }
+        participantAdministrationPageSteps.saveAndClose();
+        logout();
+    }
+
+    private void openParticipantAdministration(String searchPhrase, String courseName) {
+        homePageSteps.switchCategory(ADMIN_CATEGORY);
+        homePageSteps.checkAdminNavigation();
+        homePageSteps.goToCourseManager();
+        courseManagerPageSteps.checkLoadingIsComplete();
+        courseManagerPageSteps.searchCourse(searchPhrase, courseName);
+        courseManagerPageSteps.checkCourseIsListed(courseName);
+        courseManagerPageSteps.selectCourse(courseName);
+        courseManagerPageSteps.openParticipantAdministration();
+        participantAdministrationPageSteps.switchToWindow();
+        participantAdministrationPageSteps.checkLoadingIsComplete(PARTICIPANTS);
+    }
+
+    private void cancelParticipant(String login) {
+        participantAdministrationPageSteps.cancelParticipant(login);
+        participantAdministrationPageSteps.checkParticipantIsNotListed(login, PARTICIPANTS);
+        openCancellationList(login);
+    }
+
+    private void openCancellationList(String login) {
+        participantAdministrationPageSteps.openCancellationList();
+        participantAdministrationPageSteps.checkLoadingIsComplete(CANCELLATIONS);
+        participantAdministrationPageSteps.searchParticipant(login, CANCELLATIONS);
+    }
+
+    private void removeCancelledParticipant(String login) {
+        participantAdministrationPageSteps.removeParticipant(login);
+        participantAdministrationPageSteps.checkParticipantIsNotListed(login, CANCELLATIONS);
+    }
     @Step("Logout")
     public void logout() {
         homePageSteps.performLogout();

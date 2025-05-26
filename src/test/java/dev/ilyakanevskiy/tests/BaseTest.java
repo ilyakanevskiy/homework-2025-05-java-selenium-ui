@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assumptions.abort;
 @ExtendWith({WebdriverExtension.class, AutoScreenshotExtension.class})
 public abstract class BaseTest {
     private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
+    // Logging the shared admin out in one browser ends its session in the others,
+    // so tests using the admin never run in parallel.
+    protected static final String ADMIN_ACCOUNT = "admin account";
 
     protected UserSteps userSteps;
 

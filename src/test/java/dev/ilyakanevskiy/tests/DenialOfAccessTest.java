@@ -5,7 +5,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
+@ResourceLock(BaseTest.ADMIN_ACCOUNT)
 public class DenialOfAccessTest extends BaseTest {
     private static final int FAILED_LOGIN_ATTEMPTS_TO_BLOCK = 3;
 

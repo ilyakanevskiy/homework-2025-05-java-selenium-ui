@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import static dev.ilyakanevskiy.config.ConfigReader.getProperty;
 import static dev.ilyakanevskiy.config.TestData.INVALID_PASSWORD;
+import static dev.ilyakanevskiy.steps.ServerResponseCheck.checkServerResponse;
 import static dev.ilyakanevskiy.utils.PlaceholderHelper.adaptPlaceholder;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +25,7 @@ public class StartPageSteps {
         logger.info(adaptPlaceholder(Open.DESCRIPTION));
         String url = getProperty("base_url");
         startPage.open(url);
-        checkServerResponse(url);
+        checkServerResponse(startPage.getTitle(), url);
     }
 
     @Step(OpenInNewSession.DESCRIPTION)
@@ -32,11 +33,7 @@ public class StartPageSteps {
         logger.info(adaptPlaceholder(OpenInNewSession.DESCRIPTION));
         String url = getProperty("base_url");
         startPage.openInNewSession(url);
-        checkServerResponse(url);
-    }
-
-    private void checkServerResponse(String url) {
-        assertThat(startPage.getTitle()).as(CheckServerResponse.ASSERTION, url).doesNotMatch(CheckServerResponse.SERVER_ERROR_TITLE);
+        checkServerResponse(startPage.getTitle(), url);
     }
 
     public void checkStartPage() {
@@ -74,11 +71,6 @@ public class StartPageSteps {
 
     private static class OpenInNewSession {
         private static final String DESCRIPTION = "Opening start page in a new session";
-    }
-
-    private static class CheckServerResponse {
-        private static final String ASSERTION = "Server should respond without an error at URL: %s";
-        private static final String SERVER_ERROR_TITLE = "(5\\d\\d|404) .*";
     }
 
     private static class CheckLoadingIsComplete {

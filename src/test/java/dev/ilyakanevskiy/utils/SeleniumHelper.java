@@ -2,6 +2,7 @@ package dev.ilyakanevskiy.utils;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.NoSuchFrameException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class SeleniumHelper {
@@ -93,5 +95,37 @@ public class SeleniumHelper {
 
     public static WebElement required(Optional<WebElement> element, String description) {
         return element.orElseThrow(() -> new NoSuchElementException(description + " not found"));
+    }
+
+    public static <T> T inFrame(WebDriver driver, By frameLocator, Supplier<T> action) {
+        waitFor(driver).ignoring(StaleElementReferenceException.class).ignoring(NoSuchFrameException.class)
+                .until(ignored -> switchToFrame(driver, frameLocator));
+        try {
+            return action.get();
+        } finally {
+            driver.switchTo().defaultContent();
+        }
+    }
+
+    // ExtJS managers nest their frames differently, so the frame is searched for at any depth.
+    private static boolean switchToFrame(WebDriver driver, By frameLocator) {
+        driver.switchTo().defaultContent();
+        return switchToFrameWithin(driver, frameLocator);
+    }
+
+    private static boolean switchToFrameWithin(WebDriver driver, By frameLocator) {
+        List<WebElement> matches = driver.findElements(frameLocator);
+        if (!matches.isEmpty()) {
+            driver.switchTo().frame(matches.get(0));
+            return true;
+        }
+        for (WebElement frame : driver.findElements(By.tagName("iframe"))) {
+            driver.switchTo().frame(frame);
+            if (switchToFrameWithin(driver, frameLocator)) {
+                return true;
+            }
+            driver.switchTo().parentFrame();
+        }
+        return false;
     }
 }
