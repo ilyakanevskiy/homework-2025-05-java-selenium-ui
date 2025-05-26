@@ -5,7 +5,9 @@ import dev.ilyakanevskiy.config.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
+@ResourceLock(BaseTest.ADMIN_ACCOUNT)
 public class ConcludeCourseByProgressTest extends BaseTest {
 
     @Test
@@ -16,9 +18,9 @@ public class ConcludeCourseByProgressTest extends BaseTest {
         userSteps.selectCourse(TestData.COURSE_DEVOPS_SEARCH_PHRASE, TestData.COURSE_DEVOPS_FULLNAME);
     }
 
-    // The draft only opens the course, so there is nothing to restore yet.
     @Override
     protected void restoreInitialState() {
+        userSteps.removeParticipantFromCourseIfPresent(User.ADMIN, User.LEARNER1, TestData.COURSE_DEVOPS_SEARCH_PHRASE, TestData.COURSE_DEVOPS_FULLNAME);
     }
 
     @AfterEach

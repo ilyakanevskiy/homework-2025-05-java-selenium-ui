@@ -58,6 +58,24 @@ public class HomePageSteps {
         homePage.openFromNavigationSearch(menuItem);
     }
 
+    @Step(SwitchCategory.DESCRIPTION)
+    public void switchCategory(String category) {
+        logger.info(adaptPlaceholder(SwitchCategory.DESCRIPTION), category);
+        homePage.switchCategory(category);
+    }
+
+    @Step(CheckAdminNavigation.DESCRIPTION)
+    public void checkAdminNavigation() {
+        logger.info(adaptPlaceholder(CheckAdminNavigation.DESCRIPTION));
+        assertThat(homePage.isAdminNavigationAvailable()).as(CheckAdminNavigation.ASSERTION).isTrue();
+    }
+
+    @Step(GoToCourseManager.DESCRIPTION)
+    public void goToCourseManager() {
+        logger.info(adaptPlaceholder(GoToCourseManager.DESCRIPTION));
+        homePage.goToCourseManager();
+    }
+
     @Step(PerformLogout.DESCRIPTION)
     public void performLogout() {
         logger.info(adaptPlaceholder(PerformLogout.DESCRIPTION));
@@ -94,6 +112,19 @@ public class HomePageSteps {
 
     private static class OpenFromNavigationSearch {
         private static final String DESCRIPTION = "Attempting to open from navigation search: {0}";
+    }
+
+    private static class SwitchCategory {
+        private static final String DESCRIPTION = "Attempting to switch category to: {0}";
+    }
+
+    private static class CheckAdminNavigation {
+        private static final String DESCRIPTION = "Verifying admin navigation";
+        private static final String ASSERTION = "Admin navigation ('Content' menu) should be available.";
+    }
+
+    private static class GoToCourseManager {
+        private static final String DESCRIPTION = "Attempting to go to course manager";
     }
 
     public static class PerformLogout {

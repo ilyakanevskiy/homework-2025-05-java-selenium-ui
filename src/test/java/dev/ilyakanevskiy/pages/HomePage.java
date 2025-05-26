@@ -2,6 +2,7 @@ package dev.ilyakanevskiy.pages;
 
 import dev.ilyakanevskiy.utils.SeleniumHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -37,6 +38,10 @@ public class HomePage {
     private static final String SEARCH_NAVIGATION_FIELD_CSS = "input[placeholder='Search']";
     private static final String SEARCH_NAVIGATION_RESULT_XPATH = "//a[.//span[text()='%s']]";
     private static final String CLOSE_NOTIFICATION_CSS = "a[title='Close notification']";
+    private static final String CATEGORY_OPTION_CSS = "button[role='option'][title='%s']";
+    private static final String CONTENT_BUTTON_CSS = "button[title='Content']";
+    private static final String CONTENT_BUTTON_NAME = "'Content' button";
+    private static final String COURSES_LINK_TEXT = "Courses";
 
     private final WebDriver driver;
 
@@ -74,6 +79,10 @@ public class HomePage {
         return subElementOf(navigationPanel, By.cssSelector(SEARCH_BUTTON_CSS));
     }
 
+    private Optional<WebElement> getContentButton() {
+        return subElementOf(navigationPanel, By.cssSelector(CONTENT_BUTTON_CSS));
+    }
+
     public boolean isNavigationPanelAvailable() {
         return isElementDisplayed(navigationPanel);
     }
@@ -90,6 +99,14 @@ public class HomePage {
                 entry(CATEGORIES_BUTTON_NAME, getCategoriesButton().map(SeleniumHelper::isElementDisplayed).orElse(false)));
     }
 
+    public boolean isAdminNavigationAvailable() {
+        try {
+            return waitFor(driver).until(driver -> getContentButton().map(SeleniumHelper::isElementDisplayed).orElse(false));
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
     public boolean isLoadingComplete() {
         return SeleniumHelper.isLoadingComplete(driver, dashboardsSection);
     }
@@ -100,6 +117,18 @@ public class HomePage {
         driver.findElements(By.cssSelector(CLOSE_NOTIFICATION_CSS)).stream()
                 .filter(SeleniumHelper::isElementDisplayed)
                 .forEach(WebElement::click);
+    }
+
+    public void switchCategory(String category) {
+        closeNotifications();
+        required(getCategoriesButton(), CATEGORIES_BUTTON_NAME).click();
+        waitFor(driver).until(elementToBeClickable(By.cssSelector(format(CATEGORY_OPTION_CSS, category)))).click();
+    }
+
+    public void goToCourseManager() {
+        closeNotifications();
+        required(getContentButton(), CONTENT_BUTTON_NAME).click();
+        waitFor(driver).until(elementToBeClickable(By.linkText(COURSES_LINK_TEXT))).click();
     }
 
     public void goToCatalogue() {
