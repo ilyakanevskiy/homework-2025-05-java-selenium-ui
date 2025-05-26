@@ -15,11 +15,13 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import static dev.ilyakanevskiy.utils.SeleniumHelper.cellContaining;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.inFrames;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
+import static dev.ilyakanevskiy.utils.SeleniumHelper.rowContains;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 
 public class DenialOfAccessPage {
@@ -29,7 +31,6 @@ public class DenialOfAccessPage {
     private static final String SEARCH_BUTTON_ID = "startSearchButton";
     private static final String USER_ROW_CSS = "tr.x-grid-row";
     private static final String CELL_CSS = "td";
-    private static final int LOGIN_CELL_INDEX = 4;
     private static final int LOGIN_ATTEMPTS_CELL_INDEX = 5;
     private static final String RESET_MENU_BUTTON_ID = "tbb_reset";
     private static final String RESET_SELECTED_MENU_ITEM_ID = "tbi_reset";
@@ -51,14 +52,7 @@ public class DenialOfAccessPage {
     }
 
     private <T> T inManagerFrame(Supplier<T> action) {
-        driver.switchTo().defaultContent();
-        waitFor(driver).until(frameToBeAvailableAndSwitchToIt(CONTENT_FRAME_NAME));
-        waitFor(driver).until(frameToBeAvailableAndSwitchToIt(By.cssSelector(MANAGER_FRAME_CSS)));
-        try {
-            return action.get();
-        } finally {
-            driver.switchTo().defaultContent();
-        }
+        return inFrames(driver, action, By.name(CONTENT_FRAME_NAME), By.cssSelector(MANAGER_FRAME_CSS));
     }
 
     private FluentWait<WebDriver> waitForGrid() {
@@ -67,13 +61,13 @@ public class DenialOfAccessPage {
 
     private Optional<WebElement> findUserRow(String login) {
         return driver.findElements(By.cssSelector(USER_ROW_CSS)).stream()
-                .filter(row -> getCellText(row, LOGIN_CELL_INDEX).equals(login))
+                .filter(row -> rowContains(row, login))
                 .findFirst();
     }
 
     private boolean areOnlyMatchingRowsListed(String login) {
         return driver.findElements(By.cssSelector(USER_ROW_CSS)).stream()
-                .allMatch(row -> getCellText(row, LOGIN_CELL_INDEX).contains(login));
+                .allMatch(row -> rowContains(row, login));
     }
 
     private static String getCellText(WebElement row, int index) {
@@ -136,8 +130,7 @@ public class DenialOfAccessPage {
 
     public void resetFailedLoginAttempts(String login) {
         inManagerFrame(() -> {
-            WebElement row = required(findUserRow(login), "Row of user '" + login + "'");
-            row.findElements(By.cssSelector(CELL_CSS)).get(LOGIN_CELL_INDEX).click();
+            cellContaining(required(findUserRow(login), "Row of user '" + login + "'"), login).click();
             driver.findElement(By.id(RESET_MENU_BUTTON_ID)).click();
             waitFor(driver).until(elementToBeClickable(By.id(RESET_SELECTED_MENU_ITEM_ID))).click();
             WebElement confirmButton = waitFor(driver).until(driver -> driver.findElements(By.cssSelector(DIALOG_BUTTON_CSS)).stream()

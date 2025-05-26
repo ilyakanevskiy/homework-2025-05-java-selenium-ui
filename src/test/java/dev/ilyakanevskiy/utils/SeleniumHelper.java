@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class SeleniumHelper {
@@ -93,5 +94,29 @@ public class SeleniumHelper {
 
     public static WebElement required(Optional<WebElement> element, String description) {
         return element.orElseThrow(() -> new NoSuchElementException(description + " not found"));
+    }
+
+    // The grid highlights the search words in the rows, and getText() can lose a highlighted word: compare the raw text instead.
+    public static boolean rowContains(WebElement row, String text) {
+        return row.getDomProperty("textContent").contains(text);
+    }
+
+    public static WebElement cellContaining(WebElement row, String text) {
+        return row.findElements(By.tagName("td")).stream()
+                .filter(cell -> rowContains(cell, text))
+                .findFirst()
+                .orElse(row);
+    }
+
+    public static <T> T inFrames(WebDriver driver, Supplier<T> action, By... path) {
+        driver.switchTo().defaultContent();
+        for (By frame : path) {
+            waitFor(driver).until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
+        }
+        try {
+            return action.get();
+        } finally {
+            driver.switchTo().defaultContent();
+        }
     }
 }
