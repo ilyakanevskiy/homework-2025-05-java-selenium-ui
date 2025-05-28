@@ -2,74 +2,41 @@ package dev.ilyakanevskiy.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchWindowException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static dev.ilyakanevskiy.utils.SeleniumHelper.cellContaining;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.inFrames;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.rowContains;
 import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.numberOfWindowsToBe;
 
-public class ParticipantAdministrationPage {
-    private static final String CONTENT_FRAME_NAME = "contentframe";
+public class ParticipantAdministrationPage extends ManagerPage {
     private static final String MANAGER_FRAME_CSS = "iframe[name^='iframe_participants']";
     private static final String PARTICIPANT_LIST_FRAME_CSS = "iframe[name^='c_participants_booked_person']";
     private static final String CANCELLATION_LIST_FRAME_CSS = "iframe[name^='c_participants_cancelled_person']";
     private static final String TAB_CSS = ".x-tab";
     private static final String CANCELLATION_LIST_TAB_TEXT = "Cancellation list";
-    private static final String SEARCH_FIELD_ID = "searchTerm-inputEl";
-    private static final String SEARCH_BUTTON_ID = "startSearchButton";
-    private static final String PARTICIPANT_ROW_CSS = "tr.x-grid-row";
     private static final String PARTICIPANT_MENU_BUTTON_ID = "tbb_participant";
     private static final String CANCEL_MENU_ITEM_ID = "tbi_cancelParticipant";
     private static final String REMOVE_MENU_ITEM_ID = "tbi_removeParticipant";
-    private static final String DIALOG_BUTTON_CSS = ".x-window .x-btn";
     private static final String CONFIRM_CANCELLATION_BUTTON_TEXT = "Confirm cancellation";
     private static final String SAVE_AND_CLOSE_BUTTON_ID = "default_saveClose";
-    private static final Duration SEARCH_REPEAT_INTERVAL = Duration.ofSeconds(3);
 
-    private final WebDriver driver;
     private String courseManagerWindow;
 
     public ParticipantAdministrationPage(WebDriver driver) {
-        this.driver = driver;
-    }
-
-    private <T> T inManagerFrame(Supplier<T> action) {
-        return inFrames(driver, action, By.name(CONTENT_FRAME_NAME), By.cssSelector(MANAGER_FRAME_CSS));
+        super(driver, MANAGER_FRAME_CSS);
     }
 
     private <T> T inList(ParticipantList list, Supplier<T> action) {
-        return inFrames(driver, action, By.name(CONTENT_FRAME_NAME), By.cssSelector(MANAGER_FRAME_CSS), By.cssSelector(list.frameCss));
-    }
-
-    private List<WebElement> getParticipantRows() {
-        return driver.findElements(By.cssSelector(PARTICIPANT_ROW_CSS));
-    }
-
-    private Optional<WebElement> findParticipantRow(String login) {
-        return getParticipantRows().stream()
-                .filter(row -> rowContains(row, login))
-                .findFirst();
+        return inFrames(driver, action, CONTENT_FRAME, By.cssSelector(MANAGER_FRAME_CSS), By.cssSelector(list.frameCss));
     }
 
     private void openParticipantMenuItem(String login, String menuItemId) {
-        cellContaining(required(findParticipantRow(login), "Row of participant '" + login + "'"), login).click();
-        driver.findElement(By.id(PARTICIPANT_MENU_BUTTON_ID)).click();
-        waitFor(driver).until(elementToBeClickable(By.id(menuItemId))).click();
+        selectRow(login, "Row of participant '" + login + "'");
+        openMenuItem(PARTICIPANT_MENU_BUTTON_ID, menuItemId);
     }
 
     public void switchToWindow() {
@@ -83,8 +50,7 @@ public class ParticipantAdministrationPage {
 
     public boolean isLoadingComplete(ParticipantList list) {
         try {
-            return inList(list, () -> waitFor(driver).until(driver -> isControlEnabled(driver.findElement(By.id(SEARCH_FIELD_ID)))
-                    && isControlEnabled(driver.findElement(By.id(SEARCH_BUTTON_ID)))));
+            return inList(list, this::waitForSearchControls);
         } catch (TimeoutException e) {
             return false;
         }
@@ -92,31 +58,18 @@ public class ParticipantAdministrationPage {
 
     public void searchParticipant(ParticipantList list, String login) {
         inList(list, () -> {
-            WebElement searchField = driver.findElement(By.id(SEARCH_FIELD_ID));
-            searchField.clear();
-            searchField.sendKeys(login);
-            // A search started while the grid is still loading its initial content is lost, so repeat it until the grid is filtered.
-            AtomicBoolean searched = new AtomicBoolean(false);
-            waitFor(driver).ignoring(StaleElementReferenceException.class).pollingEvery(SEARCH_REPEAT_INTERVAL).until(driver -> {
-                if (searched.get() && getParticipantRows().stream().allMatch(row -> rowContains(row, login))) {
-                    return true;
-                }
-                driver.findElement(By.id(SEARCH_BUTTON_ID)).click();
-                searched.set(true);
-                return false;
-            });
+            searchUntilFiltered(login, rows -> allRowsContain(rows, login));
             return null;
         });
     }
 
     public boolean isParticipantListed(ParticipantList list, String login) {
-        return inList(list, () -> findParticipantRow(login).isPresent());
+        return inList(list, () -> findRow(login).isPresent());
     }
 
     public boolean isParticipantAbsent(ParticipantList list, String login) {
         try {
-            return inList(list, () -> waitFor(driver).ignoring(StaleElementReferenceException.class)
-                    .until(driver -> findParticipantRow(login).isEmpty()));
+            return inList(list, () -> waitForGrid().until(driver -> findRow(login).isEmpty()));
         } catch (TimeoutException e) {
             return false;
         }
@@ -125,12 +78,7 @@ public class ParticipantAdministrationPage {
     public void cancelParticipant(String login) {
         inList(ParticipantList.PARTICIPANTS, () -> {
             openParticipantMenuItem(login, CANCEL_MENU_ITEM_ID);
-            WebElement confirmButton = waitFor(driver).until(driver -> driver.findElements(By.cssSelector(DIALOG_BUTTON_CSS)).stream()
-                    .filter(button -> button.isDisplayed() && CONFIRM_CANCELLATION_BUTTON_TEXT.equals(button.getText().trim()))
-                    .findFirst()
-                    .orElse(null));
-            confirmButton.click();
-            waitFor(driver).until(invisibilityOf(confirmButton));
+            confirmDialog(CONFIRM_CANCELLATION_BUTTON_TEXT);
             return null;
         });
     }

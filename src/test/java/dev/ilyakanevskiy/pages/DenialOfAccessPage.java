@@ -1,73 +1,23 @@
 package dev.ilyakanevskiy.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.FluentWait;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
-import static dev.ilyakanevskiy.utils.SeleniumHelper.cellContaining;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.inFrames;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.isControlEnabled;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.required;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.rowContains;
-import static dev.ilyakanevskiy.utils.SeleniumHelper.waitFor;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOf;
-
-public class DenialOfAccessPage {
-    private static final String CONTENT_FRAME_NAME = "contentframe";
+public class DenialOfAccessPage extends ManagerPage {
     private static final String MANAGER_FRAME_CSS = "iframe[name^='iframe_navi:']";
-    private static final String SEARCH_FIELD_ID = "searchTerm-inputEl";
-    private static final String SEARCH_BUTTON_ID = "startSearchButton";
-    private static final String USER_ROW_CSS = "tr.x-grid-row";
     private static final String CELL_CSS = "td";
     private static final int LOGIN_ATTEMPTS_CELL_INDEX = 5;
     private static final String RESET_MENU_BUTTON_ID = "tbb_reset";
     private static final String RESET_SELECTED_MENU_ITEM_ID = "tbi_reset";
-    private static final String DIALOG_BUTTON_CSS = ".x-window .x-btn";
     private static final String RESET_DIALOG_BUTTON_TEXT = "Reset";
-    private static final Duration SEARCH_REPEAT_INTERVAL = Duration.ofSeconds(3);
-
-    private final WebDriver driver;
-
-    @FindBy(id = SEARCH_FIELD_ID)
-    private WebElement searchField;
-
-    @FindBy(id = SEARCH_BUTTON_ID)
-    private WebElement searchButton;
 
     public DenialOfAccessPage(WebDriver driver) {
-        this.driver = driver;
-        PageFactory.initElements(driver, this);
-    }
-
-    private <T> T inManagerFrame(Supplier<T> action) {
-        return inFrames(driver, action, By.name(CONTENT_FRAME_NAME), By.cssSelector(MANAGER_FRAME_CSS));
-    }
-
-    private FluentWait<WebDriver> waitForGrid() {
-        return waitFor(driver).ignoring(StaleElementReferenceException.class);
-    }
-
-    private Optional<WebElement> findUserRow(String login) {
-        return driver.findElements(By.cssSelector(USER_ROW_CSS)).stream()
-                .filter(row -> rowContains(row, login))
-                .findFirst();
-    }
-
-    private boolean areOnlyMatchingRowsListed(String login) {
-        return driver.findElements(By.cssSelector(USER_ROW_CSS)).stream()
-                .allMatch(row -> rowContains(row, login));
+        super(driver, MANAGER_FRAME_CSS);
     }
 
     private static String getCellText(WebElement row, int index) {
@@ -77,7 +27,7 @@ public class DenialOfAccessPage {
 
     public boolean isLoadingComplete() {
         try {
-            return inManagerFrame(() -> waitFor(driver).until(driver -> isControlEnabled(searchField) && isControlEnabled(searchButton)));
+            return inManagerFrame(this::waitForSearchControls);
         } catch (TimeoutException e) {
             return false;
         }
@@ -85,30 +35,19 @@ public class DenialOfAccessPage {
 
     public void searchUser(String login) {
         inManagerFrame(() -> {
-            searchField.clear();
-            searchField.sendKeys(login);
-            // A search started while the grid is still loading its initial content is lost, so repeat it until the grid is filtered.
-            AtomicBoolean searched = new AtomicBoolean(false);
-            waitForGrid().pollingEvery(SEARCH_REPEAT_INTERVAL).until(driver -> {
-                if (searched.get() && areOnlyMatchingRowsListed(login)) {
-                    return true;
-                }
-                searchButton.click();
-                searched.set(true);
-                return false;
-            });
+            searchUntilFiltered(login, rows -> allRowsContain(rows, login));
             return null;
         });
     }
 
     public boolean isUserListed(String login) {
-        return inManagerFrame(() -> findUserRow(login).isPresent());
+        return inManagerFrame(() -> findRow(login).isPresent());
     }
 
     public Optional<Integer> getFailedLoginAttempts(String login) {
         return inManagerFrame(() -> {
             try {
-                String attempts = waitForGrid().until(driver -> findUserRow(login)
+                String attempts = waitForGrid().until(driver -> findRow(login)
                         .map(row -> getCellText(row, LOGIN_ATTEMPTS_CELL_INDEX))
                         .orElse(null));
                 return Optional.of(Integer.parseInt(attempts));
@@ -121,7 +60,7 @@ public class DenialOfAccessPage {
     public boolean isUserAbsent(String login) {
         return inManagerFrame(() -> {
             try {
-                return waitForGrid().until(driver -> findUserRow(login).isEmpty());
+                return waitForGrid().until(driver -> findRow(login).isEmpty());
             } catch (TimeoutException e) {
                 return false;
             }
@@ -130,15 +69,9 @@ public class DenialOfAccessPage {
 
     public void resetFailedLoginAttempts(String login) {
         inManagerFrame(() -> {
-            cellContaining(required(findUserRow(login), "Row of user '" + login + "'"), login).click();
-            driver.findElement(By.id(RESET_MENU_BUTTON_ID)).click();
-            waitFor(driver).until(elementToBeClickable(By.id(RESET_SELECTED_MENU_ITEM_ID))).click();
-            WebElement confirmButton = waitFor(driver).until(driver -> driver.findElements(By.cssSelector(DIALOG_BUTTON_CSS)).stream()
-                    .filter(button -> button.isDisplayed() && RESET_DIALOG_BUTTON_TEXT.equals(button.getText().trim()))
-                    .findFirst()
-                    .orElse(null));
-            confirmButton.click();
-            waitFor(driver).until(invisibilityOf(confirmButton));
+            selectRow(login, "Row of user '" + login + "'");
+            openMenuItem(RESET_MENU_BUTTON_ID, RESET_SELECTED_MENU_ITEM_ID);
+            confirmDialog(RESET_DIALOG_BUTTON_TEXT);
             return null;
         });
     }
