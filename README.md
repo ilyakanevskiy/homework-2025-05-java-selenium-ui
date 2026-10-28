@@ -13,6 +13,6 @@ Copy `src/test/resources/config.local.properties.example` to `config.local.prope
 ## Run
 
 ```
-mvn test
-allure serve target/allure-results
+./mvnw test
+./mvnw allure:serve
 ```
