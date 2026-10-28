@@ -21,6 +21,7 @@
         <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <allure.maven.plugin.version>2.15.2</allure.maven.plugin.version>
+        <allure.commandline.version>2.34.0</allure.commandline.version>
     </properties>
 
     <dependencyManagement>
@@ -128,6 +129,9 @@
                 <groupId>io.qameta.allure</groupId>
                 <artifactId>allure-maven</artifactId>
                 <version>${allure.maven.plugin.version}</version>
+                <configuration>
+                    <reportVersion>${allure.commandline.version}</reportVersion>
+                </configuration>
             </plugin>
         </plugins>
     </build>
