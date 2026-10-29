@@ -37,7 +37,7 @@ public class ConfigReader {
     }
 
     public static String getProperty(String key) {
-        String value = properties.getProperty(key);
+        String value = System.getProperty(key, properties.getProperty(key));
 
         if (value == null || value.isBlank()) {
             throw new IllegalStateException("Property '" + key + "' is not set. Add it to '" + LOCAL_CONFIG_FILENAME + "'.");
@@ -46,7 +46,15 @@ public class ConfigReader {
         return value;
     }
 
+    private static String getProperty(String key, String defaultValue) {
+        return System.getProperty(key, properties.getProperty(key, defaultValue));
+    }
+
     public static String getBrowser() {
-        return properties.getProperty("browser", "chrome");
+        return getProperty("browser", "chrome");
+    }
+
+    public static boolean isHeadless() {
+        return Boolean.parseBoolean(getProperty("headless", "false"));
     }
 }

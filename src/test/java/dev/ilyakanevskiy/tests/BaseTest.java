@@ -30,7 +30,6 @@ public abstract class BaseTest {
 
     @BeforeEach
     void setup(WebDriver driver) {
-        driver.manage().window().maximize();
         userSteps = new UserSteps(driver);
         userSteps.openStartPage();
         assumeInitialStateRestored();
