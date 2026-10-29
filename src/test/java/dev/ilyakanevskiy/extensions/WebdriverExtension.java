@@ -2,9 +2,12 @@ package dev.ilyakanevskiy.extensions;
 
 import dev.ilyakanevskiy.config.ConfigReader;
 import org.junit.jupiter.api.extension.*;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +17,7 @@ public class WebdriverExtension implements ParameterResolver, BeforeEachCallback
     public static final String WEBDRIVER = "webdriver";
     static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create(WebdriverExtension.class);
     private static final Logger logger = LoggerFactory.getLogger(WebdriverExtension.class);
+    private static final Dimension HEADLESS_WINDOW_SIZE = new Dimension(1920, 1080);
 
     public static WebDriver getWebDriver(ExtensionContext context) {
         final ExtensionContext.Store store = context.getStore(NAMESPACE);
@@ -36,18 +40,33 @@ public class WebdriverExtension implements ParameterResolver, BeforeEachCallback
         final ExtensionContext.Store store = context.getStore(NAMESPACE);
 
         String browser = ConfigReader.getBrowser();
-        logger.info("Setting up WebDriver for browser: {}", browser);
+        boolean headless = ConfigReader.isHeadless();
+        logger.info("Setting up WebDriver for browser: {}, headless: {}", browser, headless);
 
         WebDriver driver;
         if (browser.equalsIgnoreCase("chrome")) {
-            driver = new ChromeDriver();
+            ChromeOptions options = new ChromeOptions();
+            if (headless) {
+                options.addArguments("--headless=new");
+            }
+            driver = new ChromeDriver(options);
         } else if (browser.equalsIgnoreCase("firefox")) {
-            driver = new FirefoxDriver();
+            FirefoxOptions options = new FirefoxOptions();
+            if (headless) {
+                options.addArguments("-headless");
+            }
+            driver = new FirefoxDriver(options);
         } else {
             throw new IllegalArgumentException("Unsupported browser: " + browser);
         }
-
+        // Stored first: afterEach quits the browser even if resizing the window fails.
         store.put(WEBDRIVER, driver);
+
+        if (headless) {
+            driver.manage().window().setSize(HEADLESS_WINDOW_SIZE);
+        } else {
+            driver.manage().window().maximize();
+        }
     }
 
     @Override

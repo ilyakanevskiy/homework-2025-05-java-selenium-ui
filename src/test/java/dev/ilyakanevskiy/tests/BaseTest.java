@@ -22,7 +22,6 @@ public abstract class BaseTest {
 
     @BeforeEach
     void setup(WebDriver driver) {
-        driver.manage().window().maximize();
         UserSteps steps = new UserSteps(driver);
         steps.openStartPage();
         // Set only once the start page is available: teardown skips the cleanup if the system is down.
